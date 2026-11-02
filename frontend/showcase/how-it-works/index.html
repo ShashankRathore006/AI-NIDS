@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inside the Detection Engine — AI-NIDS Architecture &amp; Pipeline</title>
+  <meta name="description" content="Technical specification of the AI-NIDS detection engine: packet capture, 5-tuple flow aggregation, 14-feature extraction vector, stateful sliding-window heuristics, and Random Forest machine learning classification.">
+
+  <!-- Typography: Inter & IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/showcase.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23245B85' stroke-width='2'><rect x='3' y='3' width='18' height='18' rx='2'/><path d='M9 9h6v6H9z'/></svg>">
+</head>
+<body>
+
+  <!-- ====================================================================
+       GLOBAL HORIZONTAL NAVIGATION
+       ==================================================================== -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="../index.html" class="brand-group">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <path d="M7 8h10M7 12h10M7 16h6"></path>
+          </svg>
+        </div>
+        <div class="brand-text-wrap">
+          <span class="brand-name">AI-NIDS</span>
+          <span class="brand-tag">Cybersecurity Labs</span>
+        </div>
+      </a>
+
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="../index.html" class="nav-link">Home</a></li>
+          <li><a href="../how-it-works.html" class="nav-link active">How It Works</a></li>
+          <li><a href="../results.html" class="nav-link">Results</a></li>
+          <li><a href="../technology.html" class="nav-link">Technology</a></li>
+          <li><a href="../about.html" class="nav-link">About</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="http://localhost:3000" class="btn-console dashboard-link" target="_blank" rel="noopener">
+          <span class="live-beacon"></span>
+          <span>Live SOC Dashboard</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====================================================================
+       PAGE HEADER
+       ==================================================================== -->
+  <div class="page-header">
+    <div class="container">
+      <div class="kicker">
+        <span class="kicker-accent">●</span>
+        <span>SYSTEM ARCHITECTURE &bull; TECHNICAL SPECIFICATION</span>
+      </div>
+      <h1 class="page-title">Inside the Detection Engine</h1>
+      <p class="page-lead">
+        A deep architectural breakdown of how AI-NIDS intercepts physical packets, reconstructs stateful bidirectional flow sessions, extracts 14 statistical distribution features, and splits analysis across deterministic behavioral heuristics and machine learning inference.
+      </p>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MAIN CONTENT
+       ==================================================================== -->
+  <main class="site-main">
+
+    <!-- ORIGINAL ARCHITECTURE DIAGRAM SECTION -->
+    <section class="section">
+      <div class="container">
+        <div class="section-kicker">ENGINEERING SCHEMATIC</div>
+        <h2 class="section-title">The Complete Eight-Stage Pipeline</h2>
+        <p class="section-desc">
+          Every stage represents an isolated, deterministic processing step engineered to minimize CPU overhead while ensuring zero loss of Layer-2/3 packet metadata.
+        </p>
+
+        <div class="diagram-wrapper">
+          <svg viewBox="0 0 1120 400" width="100%" height="auto" style="font-family: var(--font-mono); min-width: 900px;">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#245B85" />
+              </marker>
+              <pattern id="diag-grid" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="2" cy="2" r="1" fill="#E8E9E5" />
+              </pattern>
+            </defs>
+            <rect width="1120" height="400" fill="#F8F8F5" />
+            <rect width="1120" height="400" fill="url(#diag-grid)" />
+
+            <!-- ROW 1: Stages 01 to 04 -->
+            <!-- STAGE 01 -->
+            <g transform="translate(20, 30)">
+              <rect width="240" height="135" rx="2" fill="#FFFFFF" stroke="#DCDDDA" stroke-width="1.2" />
+              <rect width="240" height="26" rx="2" fill="#F0F1ED" stroke="#DCDDDA" stroke-width="1.2" />
+              <text x="12" y="18" font-size="9.5" font-weight="700" fill="#245B85">STAGE 01 &bull; CAPTURE</text>
+              <text x="12" y="52" font-size="12" font-weight="600" fill="#191C20">Packet Capture (Scapy)</text>
+              <text x="12" y="70" font-size="9.5" fill="#62676D">Sniffs wlan0 / eth0 sockets</text>
+              <text x="12" y="86" font-size="9.5" fill="#62676D">store=False memory stream</text>
+              <text x="12" y="112" font-size="9" fill="#245B85">Dissects IP, TCP, UDP, ICMP</text>
+            </g>
+
+            <line x1="260" y1="97" x2="295" y2="97" stroke="#245B85" stroke-width="1.5" marker-end="url(#arrow)" />
+
+            <!-- STAGE 02 -->
+            <g transform="translate(300, 30)">
+              <rect width="240" height="135" rx="2" fill="#FFFFFF" stroke="#DCDDDA" stroke-width="1.2" />
+              <rect width="240" height="26" rx="2" fill="#F0F1ED" stroke="#DCDDDA" stroke-width="1.2" />
+              <text x="12" y="18" font-size="9.5" font-weight="700" fill="#245B85">STAGE 02 &bull; AGGREGATION</text>
+              <text x="12" y="52" font-size="12" font-weight="600" fill="#191C20">Flow Aggregation</text>
+              <text x="12" y="70" font-size="9.5" fill="#62676D">5-Tuple: (src, dst, sp, dp, proto)</text>
+              <text x="12" y="86" font-size="9.5" fill="#62676D">Forward/Backward byte accounting</text>
+              <text x="12" y="112" font-size="9" fill="#245B85">5.0s Inactivity Expire Loop</text>
+            </g>
+
+            <line x1="540" y1="97" x2="575" y2="97" stroke="#245B85" stroke-width="1.5" marker-end="url(#arrow)" />
+
+            <!-- STAGE 03 -->
+            <g transform="translate(580, 30)">
+              <rect width="240" height="135" rx="2" fill="#FFFFFF" stroke="#DCDDDA" stroke-width="1.2" />
+              <rect width="240" height="26" rx="2" fill="#F0F1ED" stroke="#DCDDDA" stroke-width="1.2" />
+              <text x="12" y="18" font-size="9.5" font-weight="700" fill="#245B85">STAGE 03 &bull; FEATURE EXTRACTION</text>
+              <text x="12" y="52" font-size="12" font-weight="600" fill="#191C20">14-Feature Extraction</text>
+              <text x="12" y="70" font-size="9.5" fill="#62676D">Duration in &mu;s, packet &amp; byte rates</text>
+              <text x="12" y="86" font-size="9.5" fill="#62676D">Directional lengths, SYN/ACK/RST</text>
+              <text x="12" y="112" font-size="9" fill="#245B85">CICIDS2017 Format Mapping</text>
+            </g>
+
+            <line x1="820" y1="97" x2="855" y2="97" stroke="#245B85" stroke-width="1.5" marker-end="url(#arrow)" />
+
+            <!-- STAGE 04 -->
+            <g transform="translate(860, 30)">
+              <rect width="240" height="135" rx="2" fill="#E5EEF4" stroke="#245B85" stroke-width="1.4" />
+              <rect width="240" height="26" rx="2" fill="#245B85" />
+              <text x="12" y="18" font-size="9.5" font-weight="700" fill="#FFFFFF">STAGE 04 &bull; BEHAVIORAL ANALYSIS</text>
+              <text x="12" y="52" font-size="12" font-weight="700" fill="#191C20">Port Scan Heuristic</text>
+              <text x="12" y="70" font-size="9.5" fill="#62676D">10-second sliding time window</text>
+              <text x="12" y="86" font-size="9.5" fill="#62676D">Evaluates probed dest ports</text>
+              <text x="12" y="112" font-size="9" font-weight="700" fill="#245B85">Trigger: &ge;8 ports &rarr; Alert</text>
+            </g>
+
+            <!-- CONNECTOR ROW 1 TO ROW 2 -->
+            <path d="M 980 165 L 980 200 L 980 220" fill="none" stroke="#245B85" stroke-width="1.5" marker-end="url(#arrow)" />
+
+            <!-- ROW 2: Stages 05 to 08 (Right to Left data flow representation) -->
+            <!-- STAGE 05 -->
+            <g transform="translate(860, 225)">
+              <rect width="240" height="135" rx="2" fill="#E5EEF4" stroke="#245B85" stroke-width="1.4" />
+              <rect width="240" height="26" rx="2" fill="#245B85" />
+              <text x="12" y="18" font-size="9.5" font-weight="700" fill="#FFFFFF">STAGE 05 &bull; ML INFERENCE</text>
+              <text x="12" y="52" font-size="12" font-weight="700" fill="#191C20">Random Forest Classifier</text>
+              <text x="12" y="70" font-size="9.5" fill="#62676D">100 Trees &bull; 5 Target Classes</text>
+              <text x="12" y="86" font-size="9.5" fill="#62676D">Outputs category + confidence %</text>
+              <text x="12" y="112" font-size="9" font-weight="700" fill="#245B85">&lt;10ms CPU Turnaround</text>
+            </g>
+
+            <line x1="860" y1="292" x2="825" y2="292" stroke="#245B85" stroke-width="1.5" marker-end="url(#arrow)" />
+
+            <!-- STAGE 06 -->
+            <g transform="translate(580, 225)">
+              <rect width="240" height="135" rx="2" fill="#FFFFFF" stroke="#DCDDDA" stroke-width="1.2" />
+              <rect width="240" height="26" rx="2" fill="#F0F1ED" stroke="#DCDDDA" stroke-width="1.2" />
+              <text x="12" y="18" font-size="9.5" font-weight="700" fill="#245B85">STAGE 06 &bull; DATA STORAGE</text>
+              <text x="12" y="52" font-size="12" font-weight="600" fill="#191C20">SQLite Persistence</text>
+              <text x="12" y="70" font-size="9.5" fill="#62676D">database/nids.db file</text>
+              <text x="12" y="86" font-size="9.5" fill="#62676D">12-column structured row</text>
+              <text x="12" y="112" font-size="9" fill="#245B85">ML vs BEHAVIOR Engine Tag</text>
+            </g>
+
+            <line x1="580" y1="292" x2="545" y2="292" stroke="#245B85" stroke-width="1.5" marker-end="url(#arrow)" />
+
+            <!-- STAGE 07 -->
+            <g transform="translate(300, 225)">
+              <rect width="240" height="135" rx="2" fill="#FFFFFF" stroke="#DCDDDA" stroke-width="1.2" />
+              <rect width="240" height="26" rx="2" fill="#F0F1ED" stroke="#DCDDDA" stroke-width="1.2" />
+              <text x="12" y="18" font-size="9.5" font-weight="700" fill="#245B85">STAGE 07 &bull; API LAYER</text>
+              <text x="12" y="52" font-size="12" font-weight="600" fill="#191C20">FastAPI Asynchronous REST</text>
+              <text x="12" y="70" font-size="9.5" fill="#62676D">Uvicorn ASGI on port 8000</text>
+              <text x="12" y="86" font-size="9.5" fill="#62676D">/api/stats &bull; /api/alerts</text>
+              <text x="12" y="112" font-size="9" fill="#245B85">CORS-enabled JSON Stream</text>
+            </g>
+
+            <line x1="300" y1="292" x2="265" y2="292" stroke="#245B85" stroke-width="1.5" marker-end="url(#arrow)" />
+
+            <!-- STAGE 08 -->
+            <g transform="translate(20, 225)">
+              <rect width="240" height="135" rx="2" fill="#FFFFFF" stroke="#DCDDDA" stroke-width="1.2" />
+              <rect width="240" height="26" rx="2" fill="#F0F1ED" stroke="#DCDDDA" stroke-width="1.2" />
+              <text x="12" y="18" font-size="9.5" font-weight="700" fill="#245B85">STAGE 08 &bull; VISUALIZATION</text>
+              <text x="12" y="52" font-size="12" font-weight="600" fill="#191C20">Live SOC Dashboard</text>
+              <text x="12" y="70" font-size="9.5" fill="#62676D">DEFCON Threat Posture</text>
+              <text x="12" y="86" font-size="9.5" fill="#62676D">Chart.js real-time velocity</text>
+              <text x="12" y="112" font-size="9" fill="#245B85">Port 3000 &bull; Audible Alerting</text>
+            </g>
+          </svg>
+          <div class="diagram-caption">
+            <span>FIG 2.0 // EIGHT-STAGE CONTINUOUS THREAT DETECTION PIPELINE</span>
+            <span>AI-NIDS ARCHITECTURE MANUAL</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- DETAILED WALKTHROUGH OF THE 8 STAGES -->
+    <section class="section section-alt">
+      <div class="container">
+        <div class="section-kicker">STAGE-BY-STAGE SPECIFICATION</div>
+        <h2 class="section-title">Execution Lifecycle</h2>
+        <p class="section-desc">
+          Detailed technical analysis of the algorithmic operations performed at each of the eight pipeline stages.
+        </p>
+
+        <div class="editorial-list">
+
+          <!-- STAGE 01 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">STAGE 01</span>
+              <h3 class="editorial-item-title">Packet Capture (Scapy)</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                Packet sniffing executes at Layer 2/3 utilizing Scapy’s promiscuous socket interface within a dedicated background thread. To avoid memory bloat and disk serialization delays, the capture executes with <code>store=False</code>. Raw Ethernet frames, Wi-Fi frames (802.11), and IP headers are dissected directly in memory.
+              </p>
+              <p>
+                The listener ignores link-layer noise and immediately extracts the IP protocol number (TCP=6, UDP=17), socket addresses, transport ports, frame byte lengths, and TCP control flag bitfields (SYN, ACK, RST, FIN).
+              </p>
+            </div>
+          </div>
+
+          <!-- STAGE 02 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">STAGE 02</span>
+              <h3 class="editorial-item-title">Flow Aggregation</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                Single packets cannot provide sufficient statistical distribution information to detect complex network attacks. The engine aggregates frames into bidirectional conversational flows keyed on the standard 5-tuple: <code>(source_ip, destination_ip, source_port, destination_port, protocol)</code>.
+              </p>
+              <p>
+                When a packet arrives, the tracker checks an in-memory dictionary for both the forward key and the inverted reverse key <code>(dst_ip, src_ip, dst_port, src_port, protocol)</code>. Forward and backward packet counts, byte accumulations, and timestamp histories are tracked concurrently until a 5.0-second inactivity timeout triggers flow expiration.
+              </p>
+            </div>
+          </div>
+
+          <!-- STAGE 03 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">STAGE 03</span>
+              <h3 class="editorial-item-title">Feature Extraction</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                Upon flow termination, the engine executes <code>flow.to_features()</code>, calculating 14 mathematical indicators that align with the CICIDS2017 schema. Crucially, the flow duration is measured with microsecond precision to match dataset training standards.
+              </p>
+              <p>
+                Zero payload content is stored or inspected. The system calculates volumetric transfer rates (bytes/second, packets/second), mean directional packet sizes, and TCP control flag counts.
+              </p>
+            </div>
+          </div>
+
+          <!-- STAGE 04 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">STAGE 04</span>
+              <h3 class="editorial-item-title">Behavioral Analysis</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                Reconnaissance port scans present an inherent limitation for flow-based machine learning: each probe is typically a single-packet connection to a unique destination port that expires with zero backward response, resembling a brief benign lookup.
+              </p>
+              <p>
+                AI-NIDS resolves this through an in-memory stateful sliding window. The tracker maintains timestamped records of probed destination ports per source IP over a 10-second window. When a single IP addresses 8 or more unique destination ports within that window, an alert is raised immediately under the <code>BEHAVIOR</code> detection engine tag.
+              </p>
+            </div>
+          </div>
+
+          <!-- STAGE 05 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">STAGE 05</span>
+              <h3 class="editorial-item-title">Machine Learning Inference</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                Flows that pass behavioral checks are structured into a 14-column pandas DataFrame matching the exact feature order of the trained model. The feature array is passed to a scikit-learn Random Forest ensemble consisting of 100 decision trees.
+              </p>
+              <p>
+                The model outputs both the predicted class (BENIGN, DoS, DDoS, Port Scan, Brute Force) and class probability distributions via <code>predict_proba()</code>, allowing the SOC console to filter alerts by calibrated confidence thresholds. Inference executes in under 10 milliseconds on standard CPU cores.
+              </p>
+            </div>
+          </div>
+
+          <!-- STAGE 06 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">STAGE 06</span>
+              <h3 class="editorial-item-title">Data Storage (SQLite)</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                All classified flows and detected threats are recorded into an embedded SQLite database (<code>database/nids.db</code>). A 12-column table captures ISO-8601 timestamps, source/destination IP addresses, source/destination ports, transport protocol, packet count, byte size, categorical prediction, confidence percentage, and detection engine type (<code>ML</code> or <code>BEHAVIOR</code>).
+              </p>
+              <p>
+                Using SQLite provides zero-configuration persistence without requiring a standalone daemon process like PostgreSQL or MongoDB, making AI-NIDS completely portable for edge appliance deployment.
+              </p>
+            </div>
+          </div>
+
+          <!-- STAGE 07 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">STAGE 07</span>
+              <h3 class="editorial-item-title">API Communication (FastAPI)</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                The backend service runs as an asynchronous ASGI application hosted via Uvicorn on port 8000. It provides non-blocking REST endpoints: <code>/api/stats</code> returns overall system flow totals and category breakdowns; <code>/api/alerts</code> returns the 50 most recent flow logs with optional pagination; and <code>/api/alerts/recent-attacks</code> streams verified threat vectors.
+              </p>
+              <p>
+                Native CORS middleware allows cross-origin requests from any frontend dashboard or third-party Security Information and Event Management (SIEM) pipeline.
+              </p>
+            </div>
+          </div>
+
+          <!-- STAGE 08 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">STAGE 08</span>
+              <h3 class="editorial-item-title">Dashboard Visualization</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                The Live SOC Dashboard (hosted on port 3000) provides a real-time defense console. It continuously evaluates live telemetry from the FastAPI service to calculate a dynamic DEFCON Threat Posture score (DEFCON 5 Nominal through DEFCON 1 Severe Intrusion).
+              </p>
+              <p>
+                Real-time Chart.js streams visualize flow velocity and threat timelines, multi-criteria filters enable rapid log inspection, and the Web Audio API synthesizes audible frequency alerts on critical detections.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- DUAL DETECTION ENGINE SECTION -->
+    <section class="section" id="dual-engine">
+      <div class="container">
+        <div class="section-kicker">DETECTION ARCHITECTURE</div>
+        <h2 class="section-title">Dual Detection Engines: Behavioral vs. Machine Learning</h2>
+        <p class="section-desc">
+          AI-NIDS employs a hybrid detection strategy. Rather than forcing a machine learning model to detect attacks it is architecturally unsuited for, the system couples stateful heuristics with statistical machine learning.
+        </p>
+
+        <div class="grid-2">
+          <!-- ENGINE A: BEHAVIORAL -->
+          <div class="annotation-box">
+            <div class="annotation-header">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polygon points="12 8 8 12 12 16 16 12 12 8"></polygon>
+              </svg>
+              <span>ENGINE A // BEHAVIORAL DETECTION</span>
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.75rem;">Stateful Sliding-Window Tracker</h3>
+            <p>
+              Targets reconnaissance scanning sweeps where an adversary rapidly probes multiple network ports to discover running services.
+            </p>
+            <ul style="margin-top: 1rem;">
+              <li><strong>Detection Mechanism:</strong> In-memory sliding time window maintaining a set of probed destination ports per source IP.</li>
+              <li><strong>Time Window:</strong> 10 seconds continuous rolling duration.</li>
+              <li><strong>Threshold:</strong> &ge;8 unique destination ports triggers an immediate alert.</li>
+              <li><strong>Why Heuristic:</strong> Single-probe flows do not contain enough statistical anomalies for ML; tracking state across flows is deterministic and produces zero false negatives on fast sweeps.</li>
+              <li><strong>Latency:</strong> Zero flow-delay. Triggers immediately on the 8th unique port packet.</li>
+            </ul>
+          </div>
+
+          <!-- ENGINE B: MACHINE LEARNING -->
+          <div class="annotation-box">
+            <div class="annotation-header">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                <path d="M2 17l10 5 10-5"></path>
+                <path d="M2 12l10 5 10-5"></path>
+              </svg>
+              <span>ENGINE B // MACHINE LEARNING DETECTION</span>
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.75rem;">Random Forest Flow Classifier</h3>
+            <p>
+              Classifies multi-packet network flows based on mathematical distributions across 14 extracted statistical indicators.
+            </p>
+            <ul style="margin-top: 1rem;">
+              <li><strong>Model Architecture:</strong> Random Forest with 100 decision trees trained with scikit-learn.</li>
+              <li><strong>Target Classes:</strong> BENIGN, DoS, DDoS, Port Scan, Brute Force.</li>
+              <li><strong>Input Dimensionality:</strong> 14 numerical features (durations, rates, sizes, TCP flags).</li>
+              <li><strong>Why Random Forest:</strong> Exceptional resistance to overfitting, deterministic execution, and fast CPU inference (&lt;10ms) without GPU requirements.</li>
+              <li><strong>Output:</strong> Multi-class probability distribution and primary categorical prediction.</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 14-FEATURE SCHEMA TABLE SECTION -->
+    <section class="section section-white" id="features">
+      <div class="container">
+        <div class="section-kicker">FEATURE ENGINEERING</div>
+        <h2 class="section-title">The 14-Feature Input Vector</h2>
+        <p class="section-desc">
+          Extracted directly from bidirectional flow state upon session expiration. The column order strictly mirrors the trained Random Forest model schema.
+        </p>
+
+        <div class="table-wrap">
+          <table class="research-table">
+            <thead>
+              <tr>
+                <th style="width: 50px;">#</th>
+                <th style="width: 240px;">Feature Name</th>
+                <th style="width: 130px;">Data Type</th>
+                <th style="width: 140px;">Measurement Unit</th>
+                <th>Mathematical Definition &amp; Detection Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-tech">01</td>
+                <td class="col-tech">Destination Port</td>
+                <td class="col-num">Integer</td>
+                <td class="col-num">Port (0–65535)</td>
+                <td>Target socket port. Identifies well-known services (e.g. 21 FTP, 22 SSH, 80 HTTP) and indicates targeted exploit focus.</td>
+              </tr>
+              <tr>
+                <td class="col-tech">02</td>
+                <td class="col-tech">Flow Duration</td>
+                <td class="col-num">Float</td>
+                <td class="col-num">Microseconds (&mu;s)</td>
+                <td>Total elapsed duration from first packet to last packet. Matches the CICIDS2017 microsecond representation.</td>
+              </tr>
+              <tr>
+                <td class="col-tech">03</td>
+                <td class="col-tech">Total Fwd Packets</td>
+                <td class="col-num">Integer</td>
+                <td class="col-num">Count</td>
+                <td>Total packets transmitted from initiator to receiver within the conversation session.</td>
+              </tr>
+              <tr>
+                <td class="col-tech">04</td>
+                <td class="col-tech">Total Backward Packets</td>
+                <td class="col-num">Integer</td>
+                <td class="col-num">Count</td>
+                <td>Total response packets transmitted from receiver back to initiator. High asymmetry flags DoS/DDoS floods.</td>
+              </tr>
+              <tr>
+                <td class="col-tech">05</td>
+                <td class="col-tech">Total Length of Fwd Packets</td>
+                <td class="col-num">Integer</td>
+                <td class="col-num">Bytes</td>
+                <td>Cumulative payload and header bytes transmitted in the forward direction.</td>
+              </tr>
+              <tr>
+                <td class="col-tech">06</td>
+                <td class="col-tech">Total Length of Bwd Packets</td>
+                <td class="col-num">Integer</td>
+                <td class="col-num">Bytes</td>
+                <td>Cumulative payload and header bytes transmitted in the backward reply direction.</td>
+              </tr>
+              <tr>
+                <td class="col-tech">07</td>
+                <td class="col-tech">Flow Bytes/s</td>
+                <td class="col-num">Float</td>
+                <td class="col-num">Bytes / Second</td>
+                <td>Total bytes transferred divided by flow duration in seconds. Critical indicator of volumetric flooding.</td>
+              </tr>
+              <tr>
+                <td class="col-tech">08</td>
+                <td class="col-tech">Flow Packets/s</td>
+                <td class="col-num">Float</td>
+                <td class="col-num">Packets / Second</td>
+                <td>Total packet count divided by flow duration in seconds. Spikes during high-frequency flood or brute-force retries.</td>
+              </tr>
+              <tr>
+                <td class="col-tech">09</td>
+                <td class="col-tech">Fwd Packet Length Mean</td>
+                <td class="col-num">Float</td>
+                <td class="col-num">Bytes</td>
+                <td>Average size of forward packets. High consistency indicates automated fuzzing or script-driven exploitation.</td>
+              </tr>
+              <tr>
+                <td class="col-tech">10</td>
+                <td class="col-tech">Bwd Packet Length Mean</td>
+                <td class="col-num">Float</td>
+                <td class="col-num">Bytes</td>
+                <td>Average size of backward response packets. Differentiates normal web traffic from rejected unauthorized attempts.</td>
+              </tr>
+              <tr>
+                <td class="col-tech">11</td>
+                <td class="col-tech">SYN Flag Count</td>
+                <td class="col-num">Integer</td>
+                <td class="col-num">Count</td>
+                <td>Number of packets containing the TCP Synchronize flag. Spikes during SYN floods and half-open scanning.</td>
+              </tr>
+              <tr>
+                <td class="col-tech">12</td>
+                <td class="col-tech">ACK Flag Count</td>
+                <td class="col-num">Integer</td>
+                <td class="col-num">Count</td>
+                <td>Number of packets containing the TCP Acknowledgment flag. Measures connection handshake completion.</td>
+              </tr>
+              <tr>
+                <td class="col-tech">13</td>
+                <td class="col-tech">RST Flag Count</td>
+                <td class="col-num">Integer</td>
+                <td class="col-num">Count</td>
+                <td>Number of packets containing the TCP Reset flag. High frequency indicates connection teardowns and closed port sweeps.</td>
+              </tr>
+              <tr>
+                <td class="col-tech">14</td>
+                <td class="col-tech">Average Packet Size</td>
+                <td class="col-num">Float</td>
+                <td class="col-num">Bytes</td>
+                <td>Cumulative flow bytes divided by total packets. Unifies overall conversational footprint into a single metric.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TECHNICAL LIMITATIONS & HONEST ENGINEERING CONSIDERATIONS -->
+    <section class="section" id="limitations">
+      <div class="container">
+        <div class="section-kicker">ENGINEERING HONESTY</div>
+        <h2 class="section-title">Technical Limitations &amp; Design Considerations</h2>
+        <p class="section-desc">
+          Rigorous cybersecurity engineering requires explicit acknowledgment of operational trade-offs and structural constraints. Below are the documented considerations for AI-NIDS.
+        </p>
+
+        <div class="editorial-list">
+
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">CONSIDERATION 01</span>
+              <h3 class="editorial-item-title">Offline Accuracy vs. Live Detection Gap</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                There is a well-documented divergence between offline benchmark performance (99.74% on CICIDS2017) and real-world live traffic classification. Academic datasets are extracted via offline PCAP post-processing (e.g. CICFlowMeter) where complete bi-directional flows are finalized without socket packet loss or CPU jitter.
+              </p>
+              <p>
+                In a live production environment, streaming flow reconstruction must handle dynamic timeouts, packet fragmentation, and missing ACK responses. Consequently, live detection confidence scores are more variable than offline benchmark metrics.
+              </p>
+            </div>
+          </div>
+
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">CONSIDERATION 02</span>
+              <h3 class="editorial-item-title">Statistical Class Overlap Between Floods</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                Volumetric floods share fundamental statistical characteristics across attack categories. A high-velocity credential brute-force attack (e.g. rapid SSH password attempts) generates a burst of compact packets at high frequency, exhibiting volumetric rates and packet length distributions that heavily overlap with DoS and DDoS traffic.
+              </p>
+              <p>
+                During empirical live validation, multi-device flooding was classified under the Brute Force label due to this statistical similarity. Rather than concealing this, AI-NIDS reports it as a documented class-overlap finding.
+              </p>
+            </div>
+          </div>
+
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">CONSIDERATION 03</span>
+              <h3 class="editorial-item-title">Single-Packet Reconnaissance Limitations</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                Pure flow-based machine learning models are structurally blind to single-packet reconnaissance probes. A stealthy SYN scan sends one packet to port 80, one to port 443, and one to port 22. Each flow terminates with 1 packet and 0 reply bytes, appearing statistically identical to dropped benign packets.
+              </p>
+              <p>
+                This limitation directly motivated our decision to implement Engine A (the stateful sliding-window tracker), demonstrating that production intrusion detection cannot rely on standalone machine learning models without behavioral context.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ====================================================================
+       GLOBAL FOOTER
+       ==================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">AI-NIDS // CYBERSECURITY LABS</div>
+          <p class="footer-desc">
+            An autonomous, hybrid network intrusion detection system combining stateful sliding-window heuristics with Random Forest classification on live packet flows.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Documentation</div>
+          <ul class="footer-links">
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../how-it-works.html">Inside Detection Engine</a></li>
+            <li><a href="how-it-works.html#features">14 Feature Schema</a></li>
+            <li><a href="../technology.html">Technology Stack</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Validation</div>
+          <ul class="footer-links">
+            <li><a href="../results.html">Testing &amp; Findings</a></li>
+            <li><a href="results.html#offline-benchmark">CICIDS2017 Benchmark</a></li>
+            <li><a href="results.html#limitations">Documented Limitations</a></li>
+            <li><a href="../about.html">About &amp; Project Notes</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">System Endpoints</div>
+          <ul class="footer-links">
+            <li><a href="http://localhost:3000" class="dashboard-link" target="_blank" rel="noopener">Live SOC Dashboard &rarr;</a></li>
+            <li><a href="http://localhost:8000/docs" target="_blank" rel="noopener">FastAPI Swagger UI &rarr;</a></li>
+            <li><a href="about.html#roadmap">Engineering Roadmap &rarr;</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>AI-NIDS &bull; Applied Cybersecurity Engineering Research Project</div>
+        <div>Model: Random Forest (100 Trees) &bull; 65,000 Balanced CICIDS2017 Samples</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/showcase.js"></script>
+</body>
+</html>

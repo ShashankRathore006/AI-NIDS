@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIGILNET // Autonomous Network Intrusion Detection System</title>
+  <meta name="description" content="VIGILNET — Unified Network Intrusion Detection System featuring real-time packet capture, hybrid behavioral and Random Forest machine learning classification, security incident management, and deep network traffic analysis.">
+
+  <!-- Typography: Inter (UI/Prose) & IBM Plex Mono (Technical Data/Labels) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23245B85' stroke-width='2'><rect x='3' y='3' width='18' height='18' rx='2'/><path d='M7 8h10M7 12h10M7 16h6'/></svg>">
+</head>
+<body>
+
+  <!-- ====================================================================
+       PERSISTENT APPLICATION HEADER & UNIFIED NAVIGATION
+       ==================================================================== -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="header-left">
+        <!-- Application Brand -->
+        <a href="#/overview" class="app-brand" title="AI-NIDS Home">
+          <div class="brand-badge">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+              <path d="M7 8h10M7 12h10M7 16h6"></path>
+            </svg>
+          </div>
+          <div class="brand-text-col">
+            <span class="brand-title">AI-NIDS</span>
+            <span class="brand-subtitle">Defense Console</span>
+          </div>
+        </a>
+
+        <!-- Main Navigation Links -->
+        <nav>
+          <ul class="app-nav">
+            <li><a href="#/overview" class="nav-item-link active" data-page="overview">Overview</a></li>
+            <li><a href="#/soc" class="nav-item-link" data-page="soc">Live SOC</a></li>
+            <li><a href="#/traffic" class="nav-item-link" data-page="traffic">Network Traffic</a></li>
+            <li><a href="#/threats" class="nav-item-link" data-page="threats">Threat Detection</a></li>
+            <li><a href="#/alerts" class="nav-item-link" data-page="alerts">Alerts</a></li>
+            <li><a href="#/analytics" class="nav-item-link" data-page="analytics">Analytics</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Operational Controls (Right) -->
+      <div class="header-right">
+        <!-- Live API Heartbeat Beacon -->
+        <div class="connection-beacon" id="connectionBeaconGroup" title="FastAPI Backend Health">
+          <span class="beacon-dot" id="beaconDot"></span>
+          <span id="beaconText">Connecting...</span>
+          <span class="mono" id="beaconLatency" style="color: var(--text-muted);">--</span>
+        </div>
+
+        <!-- Live Detection Engine Sniffer Control -->
+        <button class="btn-ctrl" id="btnHeaderEngine" title="Start or Stop Live Detection Engine Sniffer" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+          <span class="beacon-dot" id="headerEngineDot"></span>
+          <span id="headerEngineText">Sniffer Checking...</span>
+        </button>
+
+        <!-- Live Feed Toggle -->
+        <button class="btn-ctrl active" id="btnTogglePolling" title="Pause or Resume live telemetry stream">
+          <span id="pollingBtnIcon">●</span>
+          <span id="pollingBtnText">Live</span>
+        </button>
+
+        <!-- Polling Frequency Selector -->
+        <select class="select-ctrl" id="pollingIntervalSelect" title="Telemetry polling frequency">
+          <option value="1000">1s interval</option>
+          <option value="2500" selected>2.5s interval</option>
+          <option value="5000">5s interval</option>
+          <option value="10000">10s interval</option>
+        </select>
+
+        <!-- Force Refresh -->
+        <button class="btn-ctrl" id="btnManualRefresh" title="Force immediate telemetry synchronization">
+          <span>⟳</span>
+        </button>
+
+        <!-- Sound Alert Toggle -->
+        <button class="btn-ctrl" id="btnToggleSound" title="Toggle audio chime alert on detected threats">
+          <span id="soundIcon">🔇</span>
+        </button>
+
+        <!-- Synchronization Timestamp -->
+        <span class="sync-time" id="lastSyncLabel">Updated: --:--:--</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====================================================================
+       OFFLINE BACKEND DISCONNECT NOTIFICATION BANNER
+       ==================================================================== -->
+  <div class="offline-banner" id="offlineBanner">
+    <div class="banner-content">
+      <span class="banner-tag">BACKEND OFFLINE</span>
+      <span>API unreachable at <strong id="bannerTargetUrl">http://localhost:8000</strong>. Retrying in <span id="retryCountdown">2</span>s...</span>
+      <code class="banner-hint">cd backend &amp;&amp; python3 -m uvicorn main:app --port 8000</code>
+    </div>
+    <button class="banner-btn" id="btnRetryNow">Reconnect Now</button>
+  </div>
+
+  <!-- ====================================================================
+       APPLICATION MAIN CONTAINER
+       ==================================================================== -->
+  <main class="app-main">
+
+    <!-- ==================================================================
+         PAGE 1: OVERVIEW (EXECUTIVE & OPERATIONAL SECURITY POSTURE)
+         ================================================================== -->
+    <section class="app-page active-page" id="page-overview">
+      <div class="page-top-bar">
+        <div class="page-title-group">
+          <span class="page-kicker">SYSTEM TELEMETRY // EXECUTIVE OVERVIEW</span>
+          <h1 class="page-heading">Perimeter Defense Overview</h1>
+          <p class="page-subtext">Real-time status of the AI-NIDS detection pipeline, active packet capture, and network risk posture.</p>
+        </div>
+        <div class="page-actions-group">
+          <a href="#/soc" class="btn-ctrl active">Launch Live SOC Console &rarr;</a>
+          <a href="#/threats" class="btn-ctrl">Inspect Active Threats</a>
+        </div>
+      </div>
+
+      <!-- Engine Operational Status Strip -->
+      <div class="overview-status-strip">
+        <div>
+          <div class="status-block-title">Engine State</div>
+          <div class="status-block-value">
+            <span class="beacon-dot online" id="ovEngineDot"></span>
+            <span id="ovEngineStatus">Active Listening</span>
+          </div>
+          <div class="status-block-desc">Interface: <code class="mono">wlan0/eth0</code> &bull; Mode: <code class="mono">store=False</code> &bull; Target: <span class="mono">FastAPI :8000</span></div>
+        </div>
+
+        <div>
+          <div class="status-block-title">Threat Condition</div>
+          <div class="status-block-value">
+            <span id="ovThreatLevel">Nominal</span>
+          </div>
+          <div class="status-block-desc">Evaluated over rolling 50-flow buffer</div>
+        </div>
+
+        <div>
+          <div class="status-block-title">Quick Action</div>
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+            <a href="#/soc" class="btn-ctrl active" style="font-size: 0.72rem;">Live SOC</a>
+            <a href="#/traffic" class="btn-ctrl" style="font-size: 0.72rem;">Traffic</a>
+            <a href="#/alerts" class="btn-ctrl" style="font-size: 0.72rem;">Alerts</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overview Top Metrics Strip -->
+      <div class="stats-grid">
+        <div class="stat-cell">
+          <span class="stat-title">Flows Analyzed</span>
+          <span class="stat-number" id="ovTotalFlows">0</span>
+          <span class="stat-subtext" id="ovFlowSubtext">Aggregated 5-tuple sessions</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">Cumulative DB Packets</span>
+          <span class="stat-number" id="ovTotalPackets">0</span>
+          <span class="stat-subtext">All flow sessions in database</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">Runtime Sniffed Packets</span>
+          <span class="stat-number" id="ovSessionPackets">0</span>
+          <span class="stat-subtext" id="ovSessionIface">Live sniffer session frames</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">Detected Threats</span>
+          <span class="stat-number danger" id="ovThreatCount">0</span>
+          <span class="stat-subtext" id="ovThreatRatio">0.0% malicious traffic</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">Safe Communications</span>
+          <span class="stat-number safe" id="ovBenignCount">0</span>
+          <span class="stat-subtext" id="ovBenignPct">100.0% verified normal</span>
+        </div>
+      </div>
+
+      <!-- Overview Split Workspace -->
+      <div class="workspace-split">
+        <!-- Left: Threat Distribution & Recent Events -->
+        <div>
+          <!-- Class Breakdown Panel -->
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">Attack Class Distribution</span>
+              <span class="panel-meta">5 Model Target Classes</span>
+            </div>
+            <div class="table-responsive">
+              <table class="soc-table">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th style="width: 110px;">Classification</th>
+                    <th style="width: 100px;">Flow Count</th>
+                    <th style="width: 100px;">Traffic Share</th>
+                    <th>Detection Mechanism</th>
+                  </tr>
+                </thead>
+                <tbody id="ovClassDistributionBody">
+                  <tr>
+                    <td><span class="badge-prediction benign">BENIGN</span></td>
+                    <td>Normal Flow</td>
+                    <td class="mono" id="ovCountBenign">0</td>
+                    <td class="mono" id="ovPctBenign">0.0%</td>
+                    <td>Random Forest Classifier</td>
+                  </tr>
+                  <tr>
+                    <td><span class="badge-prediction dos">DoS</span></td>
+                    <td>Denial of Service</td>
+                    <td class="mono" id="ovCountDos">0</td>
+                    <td class="mono" id="ovPctDos">0.0%</td>
+                    <td>Random Forest Classifier</td>
+                  </tr>
+                  <tr>
+                    <td><span class="badge-prediction ddos">DDoS</span></td>
+                    <td>Distributed DoS</td>
+                    <td class="mono" id="ovCountDdos">0</td>
+                    <td class="mono" id="ovPctDdos">0.0%</td>
+                    <td>Random Forest Classifier</td>
+                  </tr>
+                  <tr>
+                    <td><span class="badge-prediction portscan">PORT SCAN</span></td>
+                    <td>Reconnaissance</td>
+                    <td class="mono" id="ovCountPortScan">0</td>
+                    <td class="mono" id="ovPctPortScan">0.0%</td>
+                    <td>Sliding Window Heuristic + ML</td>
+                  </tr>
+                  <tr>
+                    <td><span class="badge-prediction bruteforce">BRUTE FORCE</span></td>
+                    <td>Credential Exploit</td>
+                    <td class="mono" id="ovCountBruteForce">0</td>
+                    <td class="mono" id="ovPctBruteForce">0.0%</td>
+                    <td>Random Forest Classifier</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Latest Security Incidents -->
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">Latest Security Incidents</span>
+              <span class="panel-meta">Chronological Stream</span>
+            </div>
+            <div class="table-responsive">
+              <table class="soc-table">
+                <thead>
+                  <tr>
+                    <th style="width: 80px;">Time</th>
+                    <th>Source Host</th>
+                    <th>Target Host</th>
+                    <th style="width: 110px;">Threat</th>
+                    <th style="width: 90px;">Confidence</th>
+                    <th style="width: 60px;">Drill</th>
+                  </tr>
+                </thead>
+                <tbody id="ovRecentAlertsBody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+              <div class="table-empty-box" id="ovAlertsEmptyState">
+                <div class="empty-icon">✓</div>
+                <div>No threats detected in current monitoring stream.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Composition Donut & Engine Arch -->
+        <div>
+          <!-- Traffic Composition Donut -->
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">Traffic Composition</span>
+              <span class="panel-meta">Live /api/stats</span>
+            </div>
+            <div class="panel-body">
+              <div class="chart-container-donut">
+                <canvas id="ovTrafficDonutChart"></canvas>
+                <div class="donut-center-text">
+                  <span class="donut-total-count" id="ovDonutTotal">0</span>
+                  <span class="donut-total-label">Flows</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Architecture Summary Card -->
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">Detection Engines</span>
+              <span class="panel-meta">Active Core</span>
+            </div>
+            <div class="panel-body" style="font-size: 0.8rem; line-height: 1.6; color: var(--text-secondary);">
+              <div style="margin-bottom: 0.75rem;">
+                <strong style="color: var(--text-primary);">Engine A: Behavioral Tracker</strong>
+                <p>10s rolling sliding-window tracker monitoring destination ports probed per host (&ge;8 ports threshold).</p>
+              </div>
+              <div style="border-top: 1px solid var(--border-subtle); padding-top: 0.75rem;">
+                <strong style="color: var(--text-primary);">Engine B: Random Forest ML</strong>
+                <p>100 decision trees evaluating 14-feature statistical vectors with &lt;10ms CPU inference.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         PAGE 2: LIVE SOC DASHBOARD (THE PRIMARY REAL-TIME CONSOLE)
+         ================================================================== -->
+    <section class="app-page" id="page-soc">
+      <div class="page-top-bar">
+        <div class="page-title-group">
+          <span class="page-kicker">TACTICAL MONITORING // DEFENSE CONSOLE</span>
+          <h1 class="page-heading">Live Security Operations Center</h1>
+          <p class="page-subtext">Continuous packet capture, real-time threat categorization, live ingress timeline, and deep forensic drilldown.</p>
+        </div>
+        <div class="page-actions-group">
+          <button class="btn-ctrl active" id="btnSocToggleSniffer" title="Start or Stop Live Packet Sniffer Engine" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+            <span class="beacon-dot online" id="socEngineDot"></span>
+            <span id="socEngineText">Pause Sniffer</span>
+          </button>
+          <button class="btn-ctrl" id="btnExportSocCsv">Export CSV</button>
+          <button class="btn-ctrl" id="btnExportSocJson">Export JSON</button>
+        </div>
+      </div>
+
+      <!-- KPI Stat Cells Row -->
+      <div class="stats-grid">
+        <div class="stat-cell">
+          <span class="stat-title">Total Flows</span>
+          <span class="stat-number" id="kpiTotalFlows">0</span>
+          <span class="stat-subtext" id="kpiAttackRatio">0.0% Threats</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">Benign</span>
+          <span class="stat-number safe" id="kpiBenign">0</span>
+          <span class="stat-subtext" id="kpiBenignPct">0.0% safe</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">DoS</span>
+          <span class="stat-number" id="kpiDos" style="color: var(--c-warn);">0</span>
+          <span class="stat-subtext" id="kpiDosPct">0.0% share</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">DDoS</span>
+          <span class="stat-number danger" id="kpiDdos">0</span>
+          <span class="stat-subtext" id="kpiDdosPct">0.0% share</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">Port Scan</span>
+          <span class="stat-number" id="kpiPortScan" style="color: var(--accent-blue);">0</span>
+          <span class="stat-subtext" id="kpiPortScanPct">0.0% share</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">Brute Force</span>
+          <span class="stat-number" id="kpiBruteForce" style="color: var(--c-bruteforce);">0</span>
+          <span class="stat-subtext" id="kpiBruteForcePct">0.0% share</span>
+        </div>
+      </div>
+
+      <!-- Threat Posture & Charts Row -->
+      <div class="grid-3" style="margin-bottom: 1.5rem;">
+        <!-- Perimeter Threat Posture Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Perimeter Threat Posture</span>
+            <span class="panel-meta" id="postureSampleSize">50 flow buffer</span>
+          </div>
+          <div class="panel-body">
+            <div class="posture-summary">
+              <div>
+                <div class="posture-caption">Risk Condition</div>
+                <div class="posture-level-badge" id="threatConditionText">Nominal</div>
+              </div>
+              <div class="posture-score-box">
+                <span class="posture-score-num" id="threatRiskScore">0</span>
+                <span class="posture-score-max">/ 100</span>
+              </div>
+            </div>
+
+            <!-- Segmented Risk Meter -->
+            <div class="risk-meter-container">
+              <div class="risk-meter-track">
+                <div class="risk-segment" id="riskSeg1" title="Low: Normal baseline"></div>
+                <div class="risk-segment" id="riskSeg2" title="Guarded: Isolated anomaly"></div>
+                <div class="risk-segment" id="riskSeg3" title="Elevated: Suspicious flows"></div>
+                <div class="risk-segment" id="riskSeg4" title="High: Active attack"></div>
+                <div class="risk-segment" id="riskSeg5" title="Critical: Severe intrusion"></div>
+              </div>
+              <div class="risk-meter-labels">
+                <span>Low</span>
+                <span>Guarded</span>
+                <span>Elevated</span>
+                <span>High</span>
+                <span>Critical</span>
+              </div>
+            </div>
+
+            <div class="posture-metrics">
+              <div class="metric-row">
+                <span class="metric-label">Threat Velocity</span>
+                <span class="metric-value" id="postureAttackRate">0.0%</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Active Threat Flows</span>
+                <span class="metric-value" id="postureThreatCount">0</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Classifier Engine</span>
+                <span class="metric-value" id="postureEngineRatio">-- / --</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Mean Confidence</span>
+                <span class="metric-value" id="postureMeanConf">100.0%</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Live Sniffed Packets</span>
+                <span class="metric-value mono" id="postureRuntimePkts">0 pkts</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Cumulative Flow Volume</span>
+                <span class="metric-value mono" id="postureCumulativeBytes">0 MB</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Donut Chart: Traffic Classification -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Traffic Distribution</span>
+            <span class="panel-meta">/api/stats</span>
+          </div>
+          <div class="panel-body">
+            <div class="chart-container-donut">
+              <canvas id="trafficDonutChart"></canvas>
+              <div class="donut-center-text">
+                <span class="donut-total-count" id="donutTotalCount">0</span>
+                <span class="donut-total-label">Flows</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Line Chart: Flow Velocity & Attack Timeline -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Flow Ingress Velocity</span>
+            <span class="panel-meta">Normal vs Attacks</span>
+          </div>
+          <div class="panel-body">
+            <div class="chart-container-timeline">
+              <canvas id="timelineChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Workspace: Alerts Table + Recent Detections Stream -->
+      <div class="workspace-split">
+        <!-- Live Alerts Table Panel -->
+        <div class="panel">
+          <div class="feed-toolbar">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="filterSearchInput" placeholder="Filter by IP, port, protocol, or prediction...">
+            </div>
+
+            <div class="filter-tabs" id="filterPillsGroup">
+              <button class="filter-tab active" data-filter="ALL">All</button>
+              <button class="filter-tab" data-filter="THREATS">Attacks Only</button>
+              <button class="filter-tab" data-filter="BENIGN">Benign</button>
+              <button class="filter-tab" data-filter="DoS">DoS</button>
+              <button class="filter-tab" data-filter="DDoS">DDoS</button>
+              <button class="filter-tab" data-filter="PORT SCAN">Port Scan</button>
+              <button class="filter-tab" data-filter="Brute Force">Brute Force</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="soc-table" id="alertsTable">
+              <thead>
+                <tr>
+                  <th style="width: 45px;">ID</th>
+                  <th style="width: 90px;">Time</th>
+                  <th>Source Host</th>
+                  <th>Destination Host</th>
+                  <th style="width: 60px;">Proto</th>
+                  <th style="width: 85px;">Payload</th>
+                  <th style="width: 110px;">Prediction</th>
+                  <th style="width: 90px;">Confidence</th>
+                  <th style="width: 65px;">Engine</th>
+                  <th style="width: 45px; text-align: center;">Drill</th>
+                </tr>
+              </thead>
+              <tbody id="alertsTableBody">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+
+            <div class="table-empty-box" id="tableEmptyState" style="display: none;">
+              <div class="empty-icon">✓</div>
+              <div id="tableEmptyMsg">Monitoring live network flows... No alerts logged yet.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Attacks Feed -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Recent Detections</span>
+            <span class="panel-meta" id="recentAttacksCount">0 attacks</span>
+          </div>
+          <div class="threat-stream-list" id="threatStreamList">
+            <!-- Populated from /api/alerts/recent-attacks -->
+          </div>
+          <div class="threats-clean-state" id="threatsCleanState" style="display: none;">
+            <div class="clean-check-icon">✓</div>
+            <div class="clean-title">No Active Threats Detected</div>
+            <div class="clean-desc">Recent flow buffers contain only benign traffic.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         PAGE 3: NETWORK TRAFFIC ANALYSIS
+         ================================================================== -->
+    <section class="app-page" id="page-traffic">
+      <div class="page-top-bar">
+        <div class="page-title-group">
+          <span class="page-kicker">TRAFFIC INSPECTION // FLOW ANALYSIS</span>
+          <h1 class="page-heading">Network Traffic Analysis</h1>
+          <p class="page-subtext">Deep packet and conversational flow monitoring across TCP, UDP, and ICMP protocols.</p>
+        </div>
+        <div class="page-actions-group">
+          <button class="btn-ctrl" id="btnExportTrafficCsv">Export Traffic Log</button>
+        </div>
+      </div>
+
+      <!-- Traffic Summary Metrics -->
+      <div class="stats-grid">
+        <div class="stat-cell">
+          <span class="stat-title">Total Volume</span>
+          <span class="stat-number" id="trafficTotalBytes">0 B</span>
+          <span class="stat-subtext">Cumulative payload bytes</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">Total Packets</span>
+          <span class="stat-number" id="trafficTotalPackets">0</span>
+          <span class="stat-subtext">Monitored Layer-2/3 frames</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">Avg Packet Size</span>
+          <span class="stat-number" id="trafficAvgPacketSize">0 B</span>
+          <span class="stat-subtext">Across active flows</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">Protocol Distribution</span>
+          <span class="stat-number" id="trafficProtoRatio" style="font-size: 1.3rem;">TCP: 0 | UDP: 0</span>
+          <span class="stat-subtext">Active socket transports</span>
+        </div>
+      </div>
+
+      <!-- Traffic Table Panel -->
+      <div class="panel">
+        <div class="feed-toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="trafficSearchInput" placeholder="Filter by IP socket, port, or protocol...">
+          </div>
+
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-proto-filter="ALL">All Protocols</button>
+            <button class="filter-tab" data-proto-filter="TCP">TCP Only</button>
+            <button class="filter-tab" data-proto-filter="UDP">UDP Only</button>
+            <button class="filter-tab" data-proto-filter="HIGH_VOL">Heavy (>50 KB)</button>
+          </div>
+
+          <label style="display:inline-flex; align-items:center; gap:6px; font-size:0.75rem; color:var(--text-secondary); cursor:pointer; margin-left:auto; user-select:none;">
+            <input type="checkbox" id="chkIncludeSimulation">
+            <span>Include Simulation Data</span>
+          </label>
+        </div>
+
+        <div class="table-responsive">
+          <table class="soc-table" id="trafficTable">
+            <thead>
+              <tr>
+                <th style="width: 50px;">ID</th>
+                <th style="width: 90px;">Time</th>
+                <th>Source Socket</th>
+                <th>Destination Socket</th>
+                <th style="width: 65px;">Proto</th>
+                <th style="width: 90px;">Packets</th>
+                <th style="width: 90px;">Bytes</th>
+                <th style="width: 110px;">Classification</th>
+                <th style="width: 60px;">Drill</th>
+              </tr>
+            </thead>
+            <tbody id="trafficTableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+          <div class="table-empty-box" id="trafficEmptyState" style="display: none;">
+            <div class="empty-icon">✓</div>
+            <div>No network flows matching current filter criteria.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         PAGE 4: THREAT DETECTION (ATTACK CLASSIFICATION)
+         ================================================================== -->
+    <section class="app-page" id="page-threats">
+      <div class="page-top-bar">
+        <div class="page-title-group">
+          <span class="page-kicker">AI CLASSIFICATION // ATTACK ANALYSIS</span>
+          <h1 class="page-heading">Threat Detection &amp; Categorization</h1>
+          <p class="page-subtext">Real-time classification across the five threat classes: BENIGN, DoS, DDoS, PORT SCAN, and BRUTE FORCE.</p>
+        </div>
+        <div class="page-actions-group">
+          <button class="btn-ctrl" id="btnExportThreatsCsv">Export Threats</button>
+        </div>
+      </div>
+
+      <!-- 5 Detection Classes Cards -->
+      <div class="threat-classes-grid">
+        <!-- BENIGN -->
+        <div class="class-card">
+          <div class="class-card-header">
+            <span class="badge-prediction benign">BENIGN</span>
+            <span class="mono" style="font-size: 0.72rem; color: var(--text-muted);">Normal</span>
+          </div>
+          <span class="class-card-count" id="threatCardBenign">0</span>
+          <p class="class-card-desc">Standard verified background network conversations and benign web requests.</p>
+        </div>
+
+        <!-- DoS -->
+        <div class="class-card">
+          <div class="class-card-header">
+            <span class="badge-prediction dos">DoS</span>
+            <span class="mono" style="font-size: 0.72rem; color: var(--text-muted);">Denial of Service</span>
+          </div>
+          <span class="class-card-count" id="threatCardDos">0</span>
+          <p class="class-card-desc">Single-source server exhaustion, Slowloris connection flooding, and HTTP rate bursts.</p>
+        </div>
+
+        <!-- DDoS -->
+        <div class="class-card">
+          <div class="class-card-header">
+            <span class="badge-prediction ddos">DDoS</span>
+            <span class="mono" style="font-size: 0.72rem; color: var(--text-muted);">Distributed DoS</span>
+          </div>
+          <span class="class-card-count" id="threatCardDdos">0</span>
+          <p class="class-card-desc">Coordinated multi-device flooding vectors exhausting link bandwidth.</p>
+        </div>
+
+        <!-- PORT SCAN -->
+        <div class="class-card">
+          <div class="class-card-header">
+            <span class="badge-prediction portscan">PORT SCAN</span>
+            <span class="mono" style="font-size: 0.72rem; color: var(--text-muted);">Reconnaissance</span>
+          </div>
+          <span class="class-card-count" id="threatCardPortScan">0</span>
+          <p class="class-card-desc">Port sweeps and service discovery sweeps flagged by the 10s sliding window tracker.</p>
+        </div>
+
+        <!-- BRUTE FORCE -->
+        <div class="class-card">
+          <div class="class-card-header">
+            <span class="badge-prediction bruteforce">BRUTE FORCE</span>
+            <span class="mono" style="font-size: 0.72rem; color: var(--text-muted);">Credential Exploit</span>
+          </div>
+          <span class="class-card-count" id="threatCardBruteForce">0</span>
+          <p class="class-card-desc">Rapid repeated login retries against SSH, FTP, or web authentication endpoints.</p>
+        </div>
+      </div>
+
+      <!-- Threat Log Table -->
+      <div class="panel">
+        <div class="feed-toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="threatCategorySearchInput" placeholder="Filter by attacker IP, target port, or attack class...">
+          </div>
+
+          <div class="filter-tabs" id="threatCategoryFilterTabs">
+            <button class="filter-tab active" data-category="ALL_ATTACKS">All Threats</button>
+            <button class="filter-tab" data-category="DoS">DoS Only</button>
+            <button class="filter-tab" data-category="DDoS">DDoS Only</button>
+            <button class="filter-tab" data-category="PORT SCAN">Port Scan Only</button>
+            <button class="filter-tab" data-category="Brute Force">Brute Force Only</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="soc-table" id="threatClassTable">
+            <thead>
+              <tr>
+                <th style="width: 50px;">ID</th>
+                <th style="width: 90px;">Time</th>
+                <th>Attacker Socket</th>
+                <th>Target Socket</th>
+                <th style="width: 120px;">Attack Category</th>
+                <th style="width: 110px;">Confidence</th>
+                <th style="width: 80px;">Engine</th>
+                <th style="width: 90px;">Payload</th>
+                <th style="width: 50px;">Drill</th>
+              </tr>
+            </thead>
+            <tbody id="threatClassTableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+          <div class="table-empty-box" id="threatClassEmptyState" style="display: none;">
+            <div class="empty-icon">✓</div>
+            <div>No matching attack vectors found in the current log buffer.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         PAGE 5: ALERTS & INCIDENTS (INCIDENT MANAGEMENT)
+         ================================================================== -->
+    <section class="app-page" id="page-alerts">
+      <div class="page-top-bar">
+        <div class="page-title-group">
+          <span class="page-kicker">INCIDENT MANAGEMENT // SECURITY EVENTS</span>
+          <h1 class="page-heading">Security Alerts &amp; Incidents</h1>
+          <p class="page-subtext">Complete chronological log of security events with acknowledgment tracking, search, and SIEM export.</p>
+        </div>
+        <div class="page-actions-group">
+          <button class="btn-ctrl" id="btnAckAll">Acknowledge All</button>
+          <button class="btn-ctrl" id="btnExportIncidentsCsv">Export CSV</button>
+          <button class="btn-ctrl" id="btnExportIncidentsJson">Export JSON</button>
+        </div>
+      </div>
+
+      <!-- Incident Status Strip -->
+      <div class="stats-grid">
+        <div class="stat-cell">
+          <span class="stat-title">Total Incidents</span>
+          <span class="stat-number danger" id="incTotalCount">0</span>
+          <span class="stat-subtext">Logged in nids.db</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">High Confidence</span>
+          <span class="stat-number" id="incHighConfCount" style="color: var(--accent-blue);">0</span>
+          <span class="stat-subtext">&gt;90% classification certainty</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">Acknowledged</span>
+          <span class="stat-number safe" id="incAckCount">0</span>
+          <span class="stat-subtext">Reviewed by operator</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">Primary Target</span>
+          <span class="stat-number" id="incTopTarget" style="font-size: 1.25rem;">--</span>
+          <span class="stat-subtext">Most frequent destination IP</span>
+        </div>
+      </div>
+
+      <!-- Incident Log Table Panel -->
+      <div class="panel">
+        <div class="feed-toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="incSearchInput" placeholder="Search incidents by IP, port, or attack type...">
+          </div>
+
+          <div class="filter-tabs" id="incFilterTabs">
+            <button class="filter-tab active" data-inc-filter="ALL">All Events</button>
+            <button class="filter-tab" data-inc-filter="UNACK">Unacknowledged</button>
+            <button class="filter-tab" data-inc-filter="HIGH_CONF">High Confidence (>90%)</button>
+            <button class="filter-tab" data-inc-filter="ML">ML Only</button>
+            <button class="filter-tab" data-inc-filter="BEHAVIOR">Behavioral Only</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="soc-table" id="incidentsTable">
+            <thead>
+              <tr>
+                <th style="width: 35px;">Ack</th>
+                <th style="width: 50px;">ID</th>
+                <th style="width: 90px;">Timestamp</th>
+                <th style="width: 120px;">Attack Type</th>
+                <th>Source Address</th>
+                <th>Target Address</th>
+                <th style="width: 60px;">Proto</th>
+                <th style="width: 90px;">Confidence</th>
+                <th style="width: 75px;">Engine</th>
+                <th style="width: 50px; text-align: center;">Drill</th>
+              </tr>
+            </thead>
+            <tbody id="incidentsTableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+          <div class="table-empty-box" id="incidentsEmptyState" style="display: none;">
+            <div class="empty-icon">✓</div>
+            <div>No security incidents found in the active database.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         PAGE 6: ANALYTICS & REPORTS (OPERATIONAL TELEMETRY & MODEL BENCHMARK)
+         ================================================================== -->
+    <section class="app-page" id="page-analytics">
+      <div class="page-top-bar">
+        <div class="page-title-group">
+          <span class="page-kicker">DATA INTELLIGENCE // MODEL EVALUATION</span>
+          <h1 class="page-heading">Analytics &amp; Performance Reports</h1>
+          <p class="page-subtext">Real-time telemetry distributions compared with offline machine learning model benchmark evaluations.</p>
+        </div>
+        <div class="page-actions-group">
+          <button class="btn-ctrl" id="btnExportAnalyticsReport">Export Full Report</button>
+        </div>
+      </div>
+
+      <!-- Live Analytics Charts Row -->
+      <div class="grid-2" style="margin-bottom: 1.5rem;">
+        <!-- Live Attack Distribution Bar Chart -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Live Attack Distribution</span>
+            <span class="panel-meta">Dynamic /api/stats</span>
+          </div>
+          <div class="panel-body">
+            <div class="chart-container-tall">
+              <canvas id="analyticsDistChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Protocol Distribution -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Protocol Share &amp; Flow Volumes</span>
+            <span class="panel-meta">TCP vs UDP vs ICMP</span>
+          </div>
+          <div class="panel-body">
+            <div class="chart-container-tall">
+              <canvas id="analyticsProtoChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OFFLINE MODEL BENCHMARK (SEPARATED STRICTLY FROM LIVE TRAFFIC) -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Offline Benchmark Evaluation (CICIDS2017 Dataset)</span>
+          <span class="panel-meta">Scientific Baseline Split</span>
+        </div>
+        <div class="panel-body">
+          <div class="benchmark-callout">
+            <div>
+              <span class="benchmark-badge-large">99.74%</span>
+              <div style="font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; margin-top: 0.25rem;">
+                Offline Model Accuracy
+              </div>
+            </div>
+            <div style="font-size: 0.82rem; line-height: 1.6; color: var(--text-secondary); max-width: 800px;">
+              <strong>Scientific Rigor Notice:</strong> This benchmark score reflects offline dataset evaluation on 65,000 balanced samples from the CICIDS2017 corpus (13,000 holdout test set across 5 classes). Offline evaluation metrics do not directly predict live detection rates due to the live feature reconstruction gap and variable network jitter.
+            </div>
+          </div>
+
+          <!-- Verified Classification Report Table -->
+          <div class="table-responsive" style="margin-bottom: 1.5rem;">
+            <table class="soc-table">
+              <thead>
+                <tr>
+                  <th>Class</th>
+                  <th style="width: 120px;">Precision</th>
+                  <th style="width: 120px;">Recall</th>
+                  <th style="width: 120px;">F1-Score</th>
+                  <th style="width: 120px;">Support</th>
+                  <th>Evaluation Context</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="badge-prediction benign">BENIGN</span></td>
+                  <td class="mono">0.9931</td>
+                  <td class="mono">0.9954</td>
+                  <td class="mono">0.9942</td>
+                  <td class="mono">2,600</td>
+                  <td>Normal legitimate baseline traffic</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-prediction bruteforce">Brute Force</span></td>
+                  <td class="mono">1.0000</td>
+                  <td class="mono">0.9996</td>
+                  <td class="mono">0.9998</td>
+                  <td class="mono">2,600</td>
+                  <td>FTP-Patator and SSH-Patator credential attempts</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-prediction ddos">DDoS</span></td>
+                  <td class="mono">0.9988</td>
+                  <td class="mono">0.9996</td>
+                  <td class="mono">0.9992</td>
+                  <td class="mono">2,600</td>
+                  <td>Multi-source LOIC and HOIC flooding vectors</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-prediction dos">DoS</span></td>
+                  <td class="mono">0.9961</td>
+                  <td class="mono">0.9935</td>
+                  <td class="mono">0.9948</td>
+                  <td class="mono">2,600</td>
+                  <td>Hulk, GoldenEye, and Slowloris exhaustion profiles</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-prediction portscan">Port Scan</span></td>
+                  <td class="mono">0.9988</td>
+                  <td class="mono">0.9988</td>
+                  <td class="mono">0.9988</td>
+                  <td class="mono">2,600</td>
+                  <td>Nmap reconnaissance port sweeps</td>
+                </tr>
+                <tr style="background-color: var(--bg-subtle); font-weight: 600;">
+                  <td>Macro Average</td>
+                  <td class="mono">0.9974</td>
+                  <td class="mono">0.9974</td>
+                  <td class="mono">0.9974</td>
+                  <td class="mono">13,000</td>
+                  <td>Unweighted arithmetic mean across all 5 classes</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Verified Confusion Matrix -->
+          <div style="margin-top: 1.5rem;">
+            <div style="font-family: var(--font-mono); font-size: 0.74rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.65rem;">
+              Confusion Matrix // 13,000 Test Samples
+            </div>
+            <div class="table-responsive">
+              <table class="soc-table">
+                <thead>
+                  <tr>
+                    <th>Actual \ Predicted</th>
+                    <th style="width: 110px;">BENIGN</th>
+                    <th style="width: 110px;">DoS</th>
+                    <th style="width: 110px;">DDoS</th>
+                    <th style="width: 110px;">Port Scan</th>
+                    <th style="width: 110px;">Brute Force</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="mono">BENIGN (2,600)</td>
+                    <td class="mono" style="font-weight: 700; color: var(--accent-blue);">2,588</td>
+                    <td class="mono">9</td>
+                    <td class="mono">1</td>
+                    <td class="mono">2</td>
+                    <td class="mono">0</td>
+                  </tr>
+                  <tr>
+                    <td class="mono">DoS (2,600)</td>
+                    <td class="mono">14</td>
+                    <td class="mono" style="font-weight: 700; color: var(--accent-blue);">2,583</td>
+                    <td class="mono">2</td>
+                    <td class="mono">1</td>
+                    <td class="mono">0</td>
+                  </tr>
+                  <tr>
+                    <td class="mono">DDoS (2,600)</td>
+                    <td class="mono">1</td>
+                    <td class="mono">0</td>
+                    <td class="mono" style="font-weight: 700; color: var(--accent-blue);">2,599</td>
+                    <td class="mono">0</td>
+                    <td class="mono">0</td>
+                  </tr>
+                  <tr>
+                    <td class="mono">Port Scan (2,600)</td>
+                    <td class="mono">2</td>
+                    <td class="mono">1</td>
+                    <td class="mono">0</td>
+                    <td class="mono" style="font-weight: 700; color: var(--accent-blue);">2,597</td>
+                    <td class="mono">0</td>
+                  </tr>
+                  <tr>
+                    <td class="mono">Brute Force (2,600)</td>
+                    <td class="mono">1</td>
+                    <td class="mono">0</td>
+                    <td class="mono">0</td>
+                    <td class="mono">0</td>
+                    <td class="mono" style="font-weight: 700; color: var(--accent-blue);">2,599</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ====================================================================
+       PERSISTENT APPLICATION FOOTER
+       ==================================================================== -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div>
+        <span>AI-NIDS Engine v2.4</span>
+        <span style="margin: 0 0.5rem;">&bull;</span>
+        <span id="footerApiEndpoint">Connected: http://localhost:8000</span>
+        <span style="margin: 0 0.5rem;">&bull;</span>
+        <span>Model: Random Forest (100 Trees)</span>
+      </div>
+      <div>
+        <span id="footerClock">UTC 00:00:00</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ====================================================================
+       FORENSIC DRILLDOWN MODAL INSPECTOR
+       ==================================================================== -->
+  <div class="modal-overlay" id="drilldownModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-title" id="modalFlowTitle">Flow Telemetry Inspection</span>
+          <span class="badge-prediction benign" id="modalPredictionBadge">BENIGN</span>
+        </div>
+        <button class="modal-close-btn" id="btnModalClose" title="Close inspector">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Socket Endpoints Vector -->
+        <div>
+          <div class="modal-section-title">Socket Endpoints</div>
+          <div class="inspect-endpoints-box">
+            <div class="endpoint-node">
+              <span class="node-role">Source Host</span>
+              <span class="node-ip" id="modalSrcIp">0.0.0.0</span>
+              <span class="node-port" id="modalSrcPort">Port: 0000</span>
+            </div>
+            <div style="font-size: 1.25rem; color: var(--accent-blue); display: flex; align-items: center; gap: 0.5rem;">
+              <span class="proto-tag" id="modalProtocol">TCP</span>
+              <span>&rarr;</span>
+            </div>
+            <div class="endpoint-node" style="text-align: right;">
+              <span class="node-role">Destination Host</span>
+              <span class="node-ip" id="modalDstIp">0.0.0.0</span>
+              <span class="node-port" id="modalDstPort">Port: 0000</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Telemetry & Metrics Grid -->
+        <div>
+          <div class="modal-section-title">Classification Metrics</div>
+          <div class="inspect-metrics-grid">
+            <div class="metric-card">
+              <span class="metric-caption">Detection Engine</span>
+              <span class="metric-val" id="modalDetectionType">Machine Learning</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-caption">Confidence</span>
+              <span class="metric-val" id="modalConfidence">100.0%</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-caption">Packet Count</span>
+              <span class="metric-val" id="modalPackets">0 pkts</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-caption">Payload Volume</span>
+              <span class="metric-val" id="modalBytes">0 B</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-caption">Average Packet Size</span>
+              <span class="metric-val" id="modalAvgPktSize">0 B</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-caption">Timestamp</span>
+              <span class="metric-val mono" id="modalTimestamp" style="font-size: 0.78rem;">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recommended Response Playbook -->
+        <div>
+          <div class="modal-section-title">SOC Playbook Recommendation</div>
+          <div class="playbook-box" id="modalPlaybookText">
+            Baseline traffic pattern verified. No containment required.
+          </div>
+        </div>
+
+        <!-- Raw JSON Record -->
+        <div>
+          <div class="json-header">
+            <span class="modal-section-title" style="margin-bottom: 0;">Raw Flow Record</span>
+            <button class="btn-copy-json" id="btnCopyJson">Copy JSON</button>
+          </div>
+          <pre class="raw-json-pre" id="modalRawJson">{}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendors & Core Scripts -->
+  <script src="vendor/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

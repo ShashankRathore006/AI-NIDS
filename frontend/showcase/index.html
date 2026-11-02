@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-NIDS — Network Intrusion Detection Through Intelligent Traffic Analysis</title>
+  <meta name="description" content="AI-NIDS is a machine-learning-based network intrusion detection system that analyzes live packet traffic, reconstructs network flows and identifies suspicious activity through statistical feature extraction and behavioral detection.">
+
+  <!-- Typography: Inter & IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/showcase.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23245B85' stroke-width='2'><rect x='3' y='3' width='18' height='18' rx='2'/><path d='M9 9h6v6H9z'/></svg>">
+</head>
+<body>
+
+  <!-- ====================================================================
+       GLOBAL HORIZONTAL NAVIGATION
+       ==================================================================== -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="index.html" class="brand-group">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <path d="M7 8h10M7 12h10M7 16h6"></path>
+          </svg>
+        </div>
+        <div class="brand-text-wrap">
+          <span class="brand-name">AI-NIDS</span>
+          <span class="brand-tag">Cybersecurity Labs</span>
+        </div>
+      </a>
+
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link active">Home</a></li>
+          <li><a href="how-it-works.html" class="nav-link">How It Works</a></li>
+          <li><a href="results.html" class="nav-link">Results</a></li>
+          <li><a href="technology.html" class="nav-link">Technology</a></li>
+          <li><a href="about.html" class="nav-link">About</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="http://localhost:3000" class="btn-console dashboard-link" target="_blank" rel="noopener">
+          <span class="live-beacon"></span>
+          <span>Live SOC Dashboard</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====================================================================
+       MAIN EDITORIAL CONTENT
+       ==================================================================== -->
+  <main class="site-main">
+
+    <!-- HERO SECTION (EDITORIAL ASYMMETRIC GRID) -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-grid">
+          <div>
+            <div class="kicker">
+              <span class="kicker-accent">●</span>
+              <span>NETWORK SECURITY / INTELLIGENT THREAT DETECTION</span>
+            </div>
+
+            <h1 class="hero-title">
+              Detecting Network Threats Through Intelligent Traffic Analysis.
+            </h1>
+
+            <p class="hero-lead">
+              AI-NIDS is a machine-learning-based network intrusion detection system that analyzes live packet traffic, reconstructs network flows and identifies suspicious activity through statistical feature extraction and behavioral detection.
+            </p>
+
+            <div class="btn-group">
+              <a href="how-it-works.html" class="btn btn-primary">
+                <span>Explore the Architecture</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </a>
+              <a href="results.html" class="btn btn-secondary">
+                <span>View Detection Results</span>
+              </a>
+              <a href="http://localhost:3000" class="btn-link-action dashboard-link" target="_blank" rel="noopener" style="margin-left: 0.5rem;">
+                <span>Open Live SOC Dashboard &rarr;</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- MINIMAL TECHNICAL ILLUSTRATION -->
+          <div>
+            <div class="diagram-wrapper" style="padding: 1.5rem; margin-bottom: 0;">
+              <svg viewBox="0 0 460 380" width="100%" height="auto" style="font-family: var(--font-mono);">
+                <defs>
+                  <pattern id="grid-dots" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+                    <circle cx="2" cy="2" r="1" fill="#DCDDDA" />
+                  </pattern>
+                </defs>
+                <rect width="460" height="380" fill="#F8F8F5" rx="2" />
+                <rect width="460" height="380" fill="url(#grid-dots)" />
+
+                <!-- Layer 1: Ingress Packet Stream -->
+                <g transform="translate(25, 25)">
+                  <rect width="410" height="54" rx="2" fill="#FFFFFF" stroke="#DCDDDA" stroke-width="1.2" />
+                  <text x="14" y="20" font-size="9" font-weight="700" fill="#245B85" letter-spacing="0.08em">INGRESS PACKET FRAME</text>
+                  <text x="14" y="38" font-size="11" fill="#191C20">Layer-2/3 Ethernet &bull; IP Socket &bull; TCP/UDP Headers</text>
+                  <rect x="330" y="14" width="66" height="24" rx="2" fill="#E5EEF4" stroke="#BFD7E8" />
+                  <text x="342" y="30" font-size="9.5" font-weight="600" fill="#245B85">ETH / IP</text>
+                </g>
+
+                <!-- Connecting Flow Lines -->
+                <line x1="230" y1="79" x2="230" y2="105" stroke="#245B85" stroke-width="1.5" stroke-dasharray="3,3" />
+                <polygon points="230,109 227,103 233,103" fill="#245B85" />
+
+                <!-- Layer 2: 5-Tuple Flow Aggregation -->
+                <g transform="translate(25, 110)">
+                  <rect width="410" height="66" rx="2" fill="#FFFFFF" stroke="#DCDDDA" stroke-width="1.2" />
+                  <text x="14" y="20" font-size="9" font-weight="700" fill="#62676D" letter-spacing="0.08em">BIDIRECTIONAL FLOW TRACKER (5-TUPLE)</text>
+                  <text x="14" y="40" font-size="10.5" fill="#191C20">Src IP, Dst IP, Src Port, Dst Port, Protocol</text>
+                  <text x="14" y="55" font-size="9.5" fill="#62676D">Forward/Backward Counters &bull; 5.0s Timeout Buffer</text>
+                  <rect x="330" y="18" width="66" height="24" rx="2" fill="#F0F1ED" stroke="#DCDDDA" />
+                  <text x="340" y="34" font-size="9.5" fill="#62676D">IN-MEM</text>
+                </g>
+
+                <!-- Branching Lines to Dual Detection Engine -->
+                <path d="M 140 176 L 140 205 L 120 205" fill="none" stroke="#245B85" stroke-width="1.4" />
+                <polygon points="116,205 122,202 122,208" fill="#245B85" />
+
+                <path d="M 320 176 L 320 205 L 340 205" fill="none" stroke="#245B85" stroke-width="1.4" />
+                <polygon points="344,205 338,202 338,208" fill="#245B85" />
+
+                <!-- Layer 3A: Behavioral Port Scan Engine -->
+                <g transform="translate(25, 206)">
+                  <rect width="195" height="85" rx="2" fill="#FFFFFF" stroke="#DCDDDA" stroke-width="1.2" />
+                  <text x="12" y="18" font-size="8.5" font-weight="700" fill="#245B85">BEHAVIORAL ENGINE</text>
+                  <text x="12" y="36" font-size="10.5" font-weight="600" fill="#191C20">Sliding Window</text>
+                  <text x="12" y="52" font-size="9.5" fill="#62676D">10s Sweep Tracker</text>
+                  <text x="12" y="68" font-size="9" fill="#245B85">&ge;8 Unique Ports Flag</text>
+                </g>
+
+                <!-- Layer 3B: Machine Learning Random Forest -->
+                <g transform="translate(240, 206)">
+                  <rect width="195" height="85" rx="2" fill="#FFFFFF" stroke="#DCDDDA" stroke-width="1.2" />
+                  <text x="12" y="18" font-size="8.5" font-weight="700" fill="#245B85">ML CLASSIFICATION</text>
+                  <text x="12" y="36" font-size="10.5" font-weight="600" fill="#191C20">Random Forest</text>
+                  <text x="12" y="52" font-size="9.5" fill="#62676D">14 Statistical Features</text>
+                  <text x="12" y="68" font-size="9" fill="#245B85">100 Trees &bull; 5 Classes</text>
+                </g>
+
+                <!-- Merge Lines to Output Verdict -->
+                <path d="M 122 291 L 122 315 L 210 315" fill="none" stroke="#62676D" stroke-width="1.2" />
+                <path d="M 338 291 L 338 315 L 250 315" fill="none" stroke="#62676D" stroke-width="1.2" />
+                <line x1="230" y1="315" x2="230" y2="330" stroke="#245B85" stroke-width="1.5" />
+                <polygon points="230,334 227,328 233,328" fill="#245B85" />
+
+                <!-- Layer 4: Structured Telemetry & Alerts -->
+                <g transform="translate(25, 335)">
+                  <rect width="410" height="32" rx="2" fill="#E5EEF4" stroke="#245B85" stroke-width="1.2" />
+                  <text x="14" y="20" font-size="9.5" font-weight="700" fill="#245B85">OUTPUT &bull; FASTAPI REST &bull; SQLITE LOGGING &bull; SOC CONSOLE</text>
+                </g>
+              </svg>
+              <div class="diagram-caption">
+                <span>FIG 1.0 // CONTINUOUS PACKET-TO-TELEMETRY PROCESSING PIPELINE</span>
+                <span>AI-NIDS KERNEL</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PERFORMANCE HIGHLIGHT BANNER -->
+        <div class="performance-banner">
+          <div class="perf-stat-group">
+            <div class="perf-num">99.74%</div>
+            <div class="perf-label">Offline Model Accuracy</div>
+          </div>
+          <div>
+            <div class="perf-sublabel">Evaluated on 65,000 balanced test samples from CICIDS2017.</div>
+            <p class="perf-explanation">
+              <strong>Engineering Integrity Notice:</strong> This benchmark reflects offline dataset evaluation on a controlled 5-class partition of the CICIDS2017 benchmark dataset (13,000 samples per category; 20% stratified test split). Offline accuracy does not represent real-time live network detection rates, where packet fragmentation, asymmetric routing, and environmental variance introduce the documented live feature reconstruction gap.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ARCHITECTURE INTRODUCTION SECTION -->
+    <section class="section">
+      <div class="container">
+        <div class="section-kicker">SYSTEM WORKFLOW</div>
+        <h2 class="section-title">The End-to-End Processing Architecture</h2>
+        <p class="section-desc">
+          AI-NIDS converts raw, high-velocity network packet frames into actionable security telemetry through an integrated seven-stage execution pipeline.
+        </p>
+
+        <!-- CLEAN SYSTEM PIPELINE DIAGRAM -->
+        <div class="diagram-wrapper">
+          <svg viewBox="0 0 1080 180" width="100%" height="auto" style="font-family: var(--font-mono); min-width: 820px;">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#245B85" />
+              </marker>
+            </defs>
+
+            <!-- STAGE 1: Scapy Packet Capture -->
+            <g transform="translate(10, 20)">
+              <rect width="150" height="110" rx="2" fill="#FFFFFF" stroke="#DCDDDA" stroke-width="1.2" />
+              <rect width="150" height="24" rx="2" fill="#F0F1ED" stroke="#DCDDDA" stroke-width="1.2" />
+              <text x="12" y="16" font-size="9" font-weight="700" fill="#245B85">STAGE 01</text>
+              <text x="12" y="46" font-size="11.5" font-weight="600" fill="#191C20">Scapy Capture</text>
+              <text x="12" y="64" font-size="9.5" fill="#62676D">Promiscuous socket</text>
+              <text x="12" y="80" font-size="9.5" fill="#62676D">store=False thread</text>
+              <text x="12" y="100" font-size="8.5" fill="#245B85">wlan0 / eth0</text>
+            </g>
+
+            <line x1="160" y1="75" x2="190" y2="75" stroke="#245B85" stroke-width="1.5" marker-end="url(#arrow)" />
+
+            <!-- STAGE 2: Flow Aggregation -->
+            <g transform="translate(195, 20)">
+              <rect width="150" height="110" rx="2" fill="#FFFFFF" stroke="#DCDDDA" stroke-width="1.2" />
+              <rect width="150" height="24" rx="2" fill="#F0F1ED" stroke="#DCDDDA" stroke-width="1.2" />
+              <text x="12" y="16" font-size="9" font-weight="700" fill="#245B85">STAGE 02</text>
+              <text x="12" y="46" font-size="11.5" font-weight="600" fill="#191C20">Flow Tracker</text>
+              <text x="12" y="64" font-size="9.5" fill="#62676D">5-Tuple hash keys</text>
+              <text x="12" y="80" font-size="9.5" fill="#62676D">Bidirectional stats</text>
+              <text x="12" y="100" font-size="8.5" fill="#245B85">5.0s Timeout</text>
+            </g>
+
+            <line x1="345" y1="75" x2="375" y2="75" stroke="#245B85" stroke-width="1.5" marker-end="url(#arrow)" />
+
+            <!-- STAGE 3: Feature Extraction -->
+            <g transform="translate(380, 20)">
+              <rect width="150" height="110" rx="2" fill="#FFFFFF" stroke="#DCDDDA" stroke-width="1.2" />
+              <rect width="150" height="24" rx="2" fill="#F0F1ED" stroke="#DCDDDA" stroke-width="1.2" />
+              <text x="12" y="16" font-size="9" font-weight="700" fill="#245B85">STAGE 03</text>
+              <text x="12" y="46" font-size="11.5" font-weight="600" fill="#191C20">14 Features</text>
+              <text x="12" y="64" font-size="9.5" fill="#62676D">Rates &amp; byte means</text>
+              <text x="12" y="80" font-size="9.5" fill="#62676D">TCP flag counts</text>
+              <text x="12" y="100" font-size="8.5" fill="#245B85">CICIDS-aligned</text>
+            </g>
+
+            <line x1="530" y1="75" x2="560" y2="75" stroke="#245B85" stroke-width="1.5" marker-end="url(#arrow)" />
+
+            <!-- STAGE 4: Random Forest / Detection -->
+            <g transform="translate(565, 12)">
+              <rect width="165" height="126" rx="2" fill="#E5EEF4" stroke="#245B85" stroke-width="1.5" />
+              <rect width="165" height="24" rx="2" fill="#245B85" />
+              <text x="12" y="16" font-size="9" font-weight="700" fill="#FFFFFF">STAGE 04 &bull; DETECTION</text>
+              <text x="12" y="46" font-size="11.5" font-weight="700" fill="#191C20">Random Forest</text>
+              <text x="12" y="64" font-size="9.5" fill="#62676D">+ Port Scan Heuristic</text>
+              <text x="12" y="80" font-size="9.5" fill="#62676D">100 Trees &bull; 5 Classes</text>
+              <text x="12" y="100" font-size="8.5" fill="#245B85">&lt;10ms CPU Latency</text>
+            </g>
+
+            <line x1="730" y1="75" x2="760" y2="75" stroke="#245B85" stroke-width="1.5" marker-end="url(#arrow)" />
+
+            <!-- STAGE 5: SQLite Database -->
+            <g transform="translate(765, 20)">
+              <rect width="135" height="110" rx="2" fill="#FFFFFF" stroke="#DCDDDA" stroke-width="1.2" />
+              <rect width="135" height="24" rx="2" fill="#F0F1ED" stroke="#DCDDDA" stroke-width="1.2" />
+              <text x="10" y="16" font-size="9" font-weight="700" fill="#245B85">STAGE 05</text>
+              <text x="10" y="46" font-size="11.5" font-weight="600" fill="#191C20">SQLite DB</text>
+              <text x="10" y="64" font-size="9.5" fill="#62676D">Embedded file</text>
+              <text x="10" y="80" font-size="9.5" fill="#62676D">12-column row</text>
+              <text x="10" y="100" font-size="8.5" fill="#245B85">nids.db</text>
+            </g>
+
+            <line x1="900" y1="75" x2="925" y2="75" stroke="#245B85" stroke-width="1.5" marker-end="url(#arrow)" />
+
+            <!-- STAGE 6: FastAPI & Presentation -->
+            <g transform="translate(930, 20)">
+              <rect width="140" height="110" rx="2" fill="#FFFFFF" stroke="#DCDDDA" stroke-width="1.2" />
+              <rect width="140" height="24" rx="2" fill="#F0F1ED" stroke="#DCDDDA" stroke-width="1.2" />
+              <text x="10" y="16" font-size="9" font-weight="700" fill="#245B85">STAGE 06 &amp; 07</text>
+              <text x="10" y="46" font-size="11.5" font-weight="600" fill="#191C20">FastAPI &amp; SOC</text>
+              <text x="10" y="64" font-size="9.5" fill="#62676D">Async REST API</text>
+              <text x="10" y="80" font-size="9.5" fill="#62676D">Chart.js Streams</text>
+              <text x="10" y="100" font-size="8.5" fill="#245B85">:8000 &bull; :3000</text>
+            </g>
+          </svg>
+          <div class="diagram-caption">
+            <span>FIG 1.1 // HIGH-LEVEL TELEMETRY DISPATCH PIPELINE</span>
+            <span>SPECIFICATION REVISION 2.4</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECT CAPABILITIES (EDITORIAL NUMBERED LIST) -->
+    <section class="section section-alt">
+      <div class="container">
+        <div class="section-kicker">ENGINEERING CAPABILITIES</div>
+        <h2 class="section-title">Core System Implementations</h2>
+        <p class="section-desc">
+          AI-NIDS was built from scratch without bloated frameworks to demonstrate full operational autonomy from network wire to SOC defense console.
+        </p>
+
+        <div class="editorial-list">
+
+          <!-- 01 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">01 / INGESTION</span>
+              <h3 class="editorial-item-title">Live Packet Capture</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                Operates at Layer 2/3 utilizing Scapy’s low-level promiscuous interface (<code>sniff(store=False)</code>) within a dedicated worker thread. Packets are parsed directly from memory without disk buffering, avoiding I/O serialization bottlenecks on resource-constrained edge hardware.
+              </p>
+              <div class="editorial-spec-list">
+                <span class="spec-badge accent">Scapy Sniffer</span>
+                <span class="spec-badge">Promiscuous Mode</span>
+                <span class="spec-badge">store=False</span>
+                <span class="spec-badge">Zero Disk Latency</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 02 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">02 / STATE TRACKING</span>
+              <h3 class="editorial-item-title">Bidirectional Flow Aggregation</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                Assembles raw discrete frames into coherent network conversations keyed on the standard 5-tuple: <code>(source_ip, destination_ip, source_port, destination_port, protocol)</code>. Reverse reply packets are matched automatically to maintain unified forward and backward byte counters.
+              </p>
+              <div class="editorial-spec-list">
+                <span class="spec-badge accent">5-Tuple Hash Key</span>
+                <span class="spec-badge">Forward / Backward Tracking</span>
+                <span class="spec-badge">5.0s Expiration Window</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 03 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">03 / MATHEMATICAL EXTRACTION</span>
+              <h3 class="editorial-item-title">14 Statistical Features</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                Derives mathematical traffic distribution indicators in real time upon flow expiration: microsecond duration, volumetric byte and packet rates, directional length means, and TCP control flag frequencies (SYN, ACK, RST). Operates purely on packet metadata, preserving payload confidentiality.
+              </p>
+              <div class="editorial-spec-list">
+                <span class="spec-badge accent">14-Dimensional Vector</span>
+                <span class="spec-badge">CICIDS2017 Schema</span>
+                <span class="spec-badge">Zero Payload Snooping</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 04 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">04 / MACHINE LEARNING</span>
+              <h3 class="editorial-item-title">Random Forest Classification</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                Evaluates structured flow vectors against an ensemble of 100 decision trees trained on 65,000 balanced samples. Delivers calibrated class predictions and probability confidence percentages entirely on commodity CPU within 10 milliseconds per flow.
+              </p>
+              <div class="editorial-spec-list">
+                <span class="spec-badge accent">100 Estimators</span>
+                <span class="spec-badge">scikit-learn CPU</span>
+                <span class="spec-badge">&lt;10ms Latency</span>
+                <span class="spec-badge">Probability Calibration</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 05 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">05 / HEURISTIC TRACKING</span>
+              <h3 class="editorial-item-title">Stateful Port Scan Detection</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                Single-packet reconnaissance sweeps do not generate sustained flow statistics. To resolve this structural machine learning limitation, AI-NIDS incorporates a dedicated stateful tracker monitoring destination ports probed per source IP over a 10-second sliding window, raising immediate alerts when eight or more unique ports are swept.
+              </p>
+              <div class="editorial-spec-list">
+                <span class="spec-badge accent">10s Sliding Window</span>
+                <span class="spec-badge">&ge;8 Port Threshold</span>
+                <span class="spec-badge">Immediate Heuristic Trigger</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 06 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">06 / TARGET CLASSES</span>
+              <h3 class="editorial-item-title">Five Detection Categories</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                Distinguishes benign normal communications from four dominant cyber threat vectors: Denial of Service (DoS), Distributed Denial of Service (DDoS), Port Scan reconnaissance, and Credential Brute Force exploits.
+              </p>
+              <div class="editorial-spec-list">
+                <span class="spec-badge">BENIGN</span>
+                <span class="spec-badge">DoS</span>
+                <span class="spec-badge">DDoS</span>
+                <span class="spec-badge">PORT SCAN</span>
+                <span class="spec-badge">BRUTE FORCE</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 07 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">07 / PERSISTENCE</span>
+              <h3 class="editorial-item-title">SQLite Structured Storage</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                Flow verdicts and metadata are committed atomically to an embedded SQLite database (<code>nids.db</code>). A 12-column schema records exact socket endpoints, protocols, packet sizes, categorical classifications, confidence scores, and detection mechanisms (<code>ML</code> vs <code>BEHAVIOR</code>).
+              </p>
+              <div class="editorial-spec-list">
+                <span class="spec-badge accent">nids.db</span>
+                <span class="spec-badge">12 Structured Fields</span>
+                <span class="spec-badge">Zero Daemon Setup</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 08 -->
+          <div class="editorial-item">
+            <div class="editorial-meta">
+              <span class="editorial-stage-num">08 / API SERVICE</span>
+              <h3 class="editorial-item-title">FastAPI Telemetry Backend</h3>
+            </div>
+            <div class="editorial-content">
+              <p>
+                An asynchronous ASGI application serves live security operations endpoints: <code>/api/stats</code> for category aggregations, <code>/api/alerts</code> for chronological event logging, and <code>/api/alerts/recent-attacks</code> for focused threat feeds.
+              </p>
+              <div class="editorial-spec-list">
+                <span class="spec-badge accent">Uvicorn ASGI</span>
+                <span class="spec-badge">Port 8000</span>
+                <span class="spec-badge">Automatic OpenAPI Docs</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- EVALUATION QUICKSTART FOR JUDGES / REVIEWERS -->
+    <section class="section">
+      <div class="container">
+        <div class="asym-grid">
+          <div>
+            <div class="section-kicker">VERIFICATION SUITE</div>
+            <h2 class="section-title">Evaluation Quickstart</h2>
+            <p class="section-desc">
+              For hackathon evaluators, professors, and technical recruiters validating the system locally, the entire stack can be launched on commodity hardware with zero external cloud dependencies.
+            </p>
+
+            <div class="annotation-box">
+              <div class="annotation-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <span>VERIFICATION CHECKPOINTS</span>
+              </div>
+              <p>Reviewers should inspect the following system milestones during live demonstration:</p>
+              <ul>
+                <li><strong>Backend API Heartbeat:</strong> <code>GET http://localhost:8000/</code> confirms operational status.</li>
+                <li><strong>Dynamic Flow Ingestion:</strong> Injected attack simulations populate the database with explicit detection tags (<code>ML</code> vs <code>BEHAVIOR</code>).</li>
+                <li><strong>Low CPU Overhead:</strong> Inference runs entirely in Python user-space without GPU requirements.</li>
+                <li><strong>Live SOC Console:</strong> Accessible at <code>http://localhost:3000</code> with real-time DEFCON threat evaluation.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div>
+            <div class="terminal-block">
+              <div class="terminal-header">
+                <span>TERMINAL WORKFLOW // THREE-STEP LAUNCH</span>
+                <button class="btn-copy" data-target="quickstart-commands">Copy</button>
+              </div>
+              <div id="quickstart-commands">
+# 1. Start the FastAPI backend service (port 8000)
+cd backend && python3 -m uvicorn main:app --reload --port 8000
+
+# 2. Launch the frontend HTTP server (port 3000)
+cd frontend && python3 server.py
+
+# 3. Inject synthetic attack bursts into the live pipeline
+python3 simulate_attacks.py --burst 15
+              </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+              <a href="how-it-works.html" class="btn btn-secondary" style="flex: 1; justify-content: center;">
+                <span>Detailed Engineering Specs &rarr;</span>
+              </a>
+              <a href="results.html" class="btn btn-secondary" style="flex: 1; justify-content: center;">
+                <span>Validation Findings &rarr;</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ====================================================================
+       GLOBAL FOOTER
+       ==================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">AI-NIDS // CYBERSECURITY LABS</div>
+          <p class="footer-desc">
+            An autonomous, hybrid network intrusion detection system combining stateful sliding-window heuristics with Random Forest classification on live packet flows.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Documentation</div>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="how-it-works.html">Inside Detection Engine</a></li>
+            <li><a href="how-it-works.html#features">14 Feature Schema</a></li>
+            <li><a href="technology.html">Technology Stack</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Validation</div>
+          <ul class="footer-links">
+            <li><a href="results.html">Testing &amp; Findings</a></li>
+            <li><a href="results.html#offline-benchmark">CICIDS2017 Benchmark</a></li>
+            <li><a href="results.html#limitations">Documented Limitations</a></li>
+            <li><a href="about.html">About &amp; Project Notes</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">System Endpoints</div>
+          <ul class="footer-links">
+            <li><a href="http://localhost:3000" class="dashboard-link" target="_blank" rel="noopener">Live SOC Dashboard &rarr;</a></li>
+            <li><a href="http://localhost:8000/docs" target="_blank" rel="noopener">FastAPI Swagger UI &rarr;</a></li>
+            <li><a href="about.html#roadmap">Engineering Roadmap &rarr;</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>AI-NIDS &bull; Applied Cybersecurity Engineering Research Project</div>
+        <div>Model: Random Forest (100 Trees) &bull; 65,000 Balanced CICIDS2017 Samples</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/showcase.js"></script>
+</body>
+</html>

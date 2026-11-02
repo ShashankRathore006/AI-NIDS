@@ -1,0 +1,24 @@
+{
+  "name": "ai-nids-dashboard",
+  "version": "2.4.0",
+  "description": "Production Sec-Ops Dashboard for AI Network Intrusion Detection System",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 server.py",
+    "showcase": "python3 showcase/serve.py",
+    "dev": "python3 -m http.server 3000",
+    "simulate": "python3 simulate_attacks.py --burst 15",
+    "simulate:loop": "python3 simulate_attacks.py --loop"
+  },
+  "keywords": [
+    "cybersecurity",
+    "nids",
+    "intrusion-detection",
+    "security-operations-center",
+    "dashboard",
+    "soc",
+    "fastapi"
+  ],
+  "author": "AI-NIDS Engineering Team",
+  "license": "MIT"
+}

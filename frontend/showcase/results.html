@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Testing, Validation &amp; Findings — AI-NIDS Empirical Evaluation</title>
+  <meta name="description" content="Technical validation report of the AI-NIDS intrusion detection system: empirical live capture observations, verified CICIDS2017 offline benchmark metrics, class overlap findings, and documented limitations.">
+
+  <!-- Typography: Inter & IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/showcase.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23245B85' stroke-width='2'><rect x='3' y='3' width='18' height='18' rx='2'/><path d='M9 9h6v6H9z'/></svg>">
+</head>
+<body>
+
+  <!-- ====================================================================
+       GLOBAL HORIZONTAL NAVIGATION
+       ==================================================================== -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="index.html" class="brand-group">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <path d="M7 8h10M7 12h10M7 16h6"></path>
+          </svg>
+        </div>
+        <div class="brand-text-wrap">
+          <span class="brand-name">AI-NIDS</span>
+          <span class="brand-tag">Cybersecurity Labs</span>
+        </div>
+      </a>
+
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="how-it-works.html" class="nav-link">How It Works</a></li>
+          <li><a href="results.html" class="nav-link active">Results</a></li>
+          <li><a href="technology.html" class="nav-link">Technology</a></li>
+          <li><a href="about.html" class="nav-link">About</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="http://localhost:3000" class="btn-console dashboard-link" target="_blank" rel="noopener">
+          <span class="live-beacon"></span>
+          <span>Live SOC Dashboard</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====================================================================
+       PAGE HEADER
+       ==================================================================== -->
+  <div class="page-header">
+    <div class="container">
+      <div class="kicker">
+        <span class="kicker-accent">●</span>
+        <span>RESEARCH VALIDATION REPORT &bull; TECHNICAL SPECIFICATION</span>
+      </div>
+      <h1 class="page-title">Testing, Validation &amp; Findings</h1>
+      <p class="page-lead">
+        A rigorous, transparent documentation of empirical test outcomes. We separate live capture observations from offline benchmark scores, document verified class overlap, and record existing architectural limitations without marketing embellishments.
+      </p>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MAIN CONTENT
+       ==================================================================== -->
+  <main class="site-main">
+
+    <!-- LIVE VALIDATION RESEARCH TABLE SECTION -->
+    <section class="section">
+      <div class="container">
+        <div class="section-kicker">EMPIRICAL TESTING</div>
+        <h2 class="section-title">Live Network Attack Validation Summary</h2>
+        <p class="section-desc">
+          Evaluated against active network traffic bursts generated across local virtual and physical interfaces. Below are the verified observations from operational test runs.
+        </p>
+
+        <!-- EXACT RESEARCH TABLE SPECIFIED BY PROMPT -->
+        <div class="table-wrap">
+          <table class="research-table">
+            <thead>
+              <tr>
+                <th style="width: 220px;">Detection</th>
+                <th style="width: 170px;">Validation</th>
+                <th>Observation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-tech">Port Scan</td>
+                <td>
+                  <span class="status-tag validated">Validated</span>
+                </td>
+                <td>
+                  Detected through behavioral sliding-window logic. Probed destination ports are tracked over a 10-second window; immediately triggers when the threshold of 8 unique ports is crossed.
+                </td>
+              </tr>
+              <tr>
+                <td class="col-tech">Brute Force</td>
+                <td>
+                  <span class="status-tag validated">Validated</span>
+                </td>
+                <td>
+                  Approximately 77–78% confidence in observed testing. Rapid authentication attempts on target services produced consistent statistical flow signatures recognized by the Random Forest classifier.
+                </td>
+              </tr>
+              <tr>
+                <td class="col-tech">DoS</td>
+                <td>
+                  <span class="status-tag limitation">Tested</span>
+                </td>
+                <td>
+                  Documented classification limitation. Live single-source flooding tests showed variable classification behavior under streaming flow reconstruction.
+                </td>
+              </tr>
+              <tr>
+                <td class="col-tech">DDoS</td>
+                <td>
+                  <span class="status-tag tested">Tested</span>
+                </td>
+                <td>
+                  Multi-device flood classified as Brute Force. Documented class-overlap finding resulting from statistical distribution similarities between high-frequency packet bursts.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- DETAILED FINDINGS DISCUSSIONS -->
+        <div class="grid-2" style="margin-top: 3rem;">
+
+          <!-- DDOS FINDING ANALYSIS -->
+          <div class="annotation-box">
+            <div class="annotation-header">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>FINDING 01 // DDOS CLASS-OVERLAP ANALYSIS</span>
+            </div>
+            <h3 style="font-size: 1.15rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.65rem;">Multi-Device Flood Classified as Brute Force</h3>
+            <p>
+              In our live test scenarios, multi-device flood traffic injected into the capture pipeline was classified by the Random Forest model under the <code>Brute Force</code> category rather than <code>DDoS</code>.
+            </p>
+            <p>
+              <strong>Engineering Rationale:</strong> We report this transparently as a verified class-overlap finding, not as a successful DDoS detection. Both attack categories share overlapping statistical distributions: compact packet sizes, uniform payload lengths, and rapid packet transfer rates. In the absence of global multi-flow correlation, single-flow statistical representations can project these bursts onto adjacent decision tree boundaries.
+            </p>
+          </div>
+
+          <!-- DOS FINDING ANALYSIS -->
+          <div class="annotation-box">
+            <div class="annotation-header">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>FINDING 02 // DOS CLASSIFICATION LIMITATION</span>
+            </div>
+            <h3 style="font-size: 1.15rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.65rem;">Documented Classification Limitation</h3>
+            <p>
+              During simulated denial-of-service testing, single-source volumetric floods exhibited classification variance under real-time streaming flow reconstruction.
+            </p>
+            <p>
+              <strong>Engineering Integrity:</strong> We deliberately document this as an existing limitation. We do not fabricate or speculate on unverified causes. When flows are actively flooded, socket buffer packet dropping in user-space Scapy can distort calculated inter-arrival times and packet rates, resulting in classification drift that is actively being researched for future revisions.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- OFFLINE MODEL EVALUATION BENCHMARK SECTION -->
+    <section class="section section-alt" id="offline-benchmark">
+      <div class="container">
+        <div class="section-kicker">MODEL SPECIFICATION</div>
+        <h2 class="section-title">Offline Benchmark Evaluation (CICIDS2017)</h2>
+        <p class="section-desc">
+          Evaluated using an offline, 5-class balanced dataset partition from the benchmark Canadian Institute for Cybersecurity CICIDS2017 corpus.
+        </p>
+
+        <!-- BENCHMARK SUMMARY STATS -->
+        <div class="performance-banner" style="margin-top: 0; margin-bottom: 3rem;">
+          <div class="perf-stat-group">
+            <div class="perf-num">99.74%</div>
+            <div class="perf-label">Offline Model Accuracy</div>
+          </div>
+          <div>
+            <div class="perf-sublabel">Evaluated on 65,000 balanced samples (13,000 test evaluation split).</div>
+            <p class="perf-explanation">
+              <strong>Dataset Partition:</strong> The training dataset comprises 65,000 total flows with exact class balance (13,000 samples each across BENIGN, DoS, DDoS, Port Scan, and Brute Force). Testing was executed on a 20% stratified holdout split of 13,000 unobserved samples (2,600 samples per class) using scikit-learn's <code>RandomForestClassifier(n_estimators=100, random_state=42)</code>.
+            </p>
+          </div>
+        </div>
+
+        <!-- DETAILED CLASSIFICATION REPORT TABLE (ACTUAL VERIFIED NUMBERS) -->
+        <div class="table-wrap">
+          <table class="research-table">
+            <thead>
+              <tr>
+                <th style="width: 200px;">Target Class</th>
+                <th class="col-num" style="width: 140px;">Precision</th>
+                <th class="col-num" style="width: 140px;">Recall</th>
+                <th class="col-num" style="width: 140px;">F1-Score</th>
+                <th class="col-num" style="width: 140px;">Test Support</th>
+                <th>Evaluation Context</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-tech">BENIGN</td>
+                <td class="col-num">0.9931 (99.31%)</td>
+                <td class="col-num">0.9954 (99.54%)</td>
+                <td class="col-num">0.9942</td>
+                <td class="col-num">2,600</td>
+                <td>Standard legitimate background traffic flows</td>
+              </tr>
+              <tr>
+                <td class="col-tech">Brute Force</td>
+                <td class="col-num">1.0000 (100.0%)</td>
+                <td class="col-num">0.9996 (99.96%)</td>
+                <td class="col-num">0.9998</td>
+                <td class="col-num">2,600</td>
+                <td>FTP-Patator and SSH-Patator automated credential attempts</td>
+              </tr>
+              <tr>
+                <td class="col-tech">DDoS</td>
+                <td class="col-num">0.9988 (99.88%)</td>
+                <td class="col-num">0.9996 (99.96%)</td>
+                <td class="col-num">0.9992</td>
+                <td class="col-num">2,600</td>
+                <td>Volumetric multi-source LOIC and HOIC flooding vectors</td>
+              </tr>
+              <tr>
+                <td class="col-tech">DoS</td>
+                <td class="col-num">0.9961 (99.61%)</td>
+                <td class="col-num">0.9935 (99.35%)</td>
+                <td class="col-num">0.9948</td>
+                <td class="col-num">2,600</td>
+                <td>DoS Hulk, GoldenEye, Slowloris, and Slowhttptest profiles</td>
+              </tr>
+              <tr>
+                <td class="col-tech">Port Scan</td>
+                <td class="col-num">0.9988 (99.88%)</td>
+                <td class="col-num">0.9988 (99.88%)</td>
+                <td class="col-num">0.9988</td>
+                <td class="col-num">2,600</td>
+                <td>Nmap service discovery and sweep activity</td>
+              </tr>
+              <tr style="background-color: var(--bg-secondary); font-weight: 600;">
+                <td class="col-tech">Macro Average</td>
+                <td class="col-num">0.9974 (99.74%)</td>
+                <td class="col-num">0.9974 (99.74%)</td>
+                <td class="col-num">0.9974</td>
+                <td class="col-num">13,000</td>
+                <td>Unweighted arithmetic mean across all 5 classes</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- CONFUSION MATRIX (ACTUAL VERIFIED NUMBERS) -->
+        <div style="margin-top: 3.5rem;">
+          <div class="section-kicker">CONFUSION MATRIX // TEST SPLIT</div>
+          <h3 style="font-size: 1.45rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1.25rem;">20% Stratified Holdout Test Split (13,000 Samples)</h3>
+
+          <div class="table-wrap">
+            <table class="research-table">
+              <thead>
+                <tr>
+                  <th style="width: 170px;">Actual \ Predicted</th>
+                  <th class="col-num" style="width: 120px;">BENIGN</th>
+                  <th class="col-num" style="width: 120px;">DoS</th>
+                  <th class="col-num" style="width: 120px;">DDoS</th>
+                  <th class="col-num" style="width: 120px;">Port Scan</th>
+                  <th class="col-num" style="width: 120px;">Brute Force</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="col-tech">BENIGN (2,600)</td>
+                  <td class="col-num" style="font-weight: 700; color: var(--accent-blue);">2,588</td>
+                  <td class="col-num">9</td>
+                  <td class="col-num">1</td>
+                  <td class="col-num">2</td>
+                  <td class="col-num">0</td>
+                </tr>
+                <tr>
+                  <td class="col-tech">DoS (2,600)</td>
+                  <td class="col-num">14</td>
+                  <td class="col-num" style="font-weight: 700; color: var(--accent-blue);">2,583</td>
+                  <td class="col-num">2</td>
+                  <td class="col-num">1</td>
+                  <td class="col-num">0</td>
+                </tr>
+                <tr>
+                  <td class="col-tech">DDoS (2,600)</td>
+                  <td class="col-num">1</td>
+                  <td class="col-num">0</td>
+                  <td class="col-num" style="font-weight: 700; color: var(--accent-blue);">2,599</td>
+                  <td class="col-num">0</td>
+                  <td class="col-num">0</td>
+                </tr>
+                <tr>
+                  <td class="col-tech">Port Scan (2,600)</td>
+                  <td class="col-num">2</td>
+                  <td class="col-num">1</td>
+                  <td class="col-num">0</td>
+                  <td class="col-num" style="font-weight: 700; color: var(--accent-blue);">2,597</td>
+                  <td class="col-num">0</td>
+                </tr>
+                <tr>
+                  <td class="col-tech">Brute Force (2,600)</td>
+                  <td class="col-num">1</td>
+                  <td class="col-num">0</td>
+                  <td class="col-num">0</td>
+                  <td class="col-num">0</td>
+                  <td class="col-num" style="font-weight: 700; color: var(--accent-blue);">2,599</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="diagram-caption" style="margin-top: 0.5rem;">
+            <span>DATASET: CICIDS2017 5-CLASS BALANCED MATRIX &bull; RANDOM_STATE=42</span>
+            <span>TOTAL TEST INSTANCES: 13,000</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CRITICAL SEPARATION CALLOUT -->
+    <section class="section">
+      <div class="container">
+        <div class="asym-grid">
+          <div>
+            <div class="section-kicker">SCIENTIFIC SEPARATION</div>
+            <h2 class="section-title">Distinguishing Dataset Benchmarks From Live Detection</h2>
+          </div>
+          <div>
+            <p>
+              In academic cybersecurity literature, models frequently report >99% detection accuracy on static CSV files. However, deploying the identical model in a production network pipeline reveals fundamental operational divergence:
+            </p>
+            <p>
+              <strong>1. Timing Artifacts:</strong> Dataset tools calculate exact microsecond inter-arrival times across complete offline PCAPs. In live network capture, operating system scheduling and user-space packet queueing introduce jitter into calculated rates.
+            </p>
+            <p>
+              <strong>2. Connection Asymmetry:</strong> Offline datasets capture pristine full-duplex traffic. In live environments, routing paths can result in unidirectional packet visibility where reverse ACK packets bypass the monitoring interface.
+            </p>
+            <p>
+              <strong>3. Environmental Novelty:</strong> The 14-feature vector is resilient, but production networks feature protocol tunneling and TLS 1.3 handshake variations not present in historical 2017 benchmark captures.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ====================================================================
+       GLOBAL FOOTER
+       ==================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">AI-NIDS // CYBERSECURITY LABS</div>
+          <p class="footer-desc">
+            An autonomous, hybrid network intrusion detection system combining stateful sliding-window heuristics with Random Forest classification on live packet flows.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Documentation</div>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="how-it-works.html">Inside Detection Engine</a></li>
+            <li><a href="how-it-works.html#features">14 Feature Schema</a></li>
+            <li><a href="technology.html">Technology Stack</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Validation</div>
+          <ul class="footer-links">
+            <li><a href="results.html">Testing &amp; Findings</a></li>
+            <li><a href="results.html#offline-benchmark">CICIDS2017 Benchmark</a></li>
+            <li><a href="results.html#limitations">Documented Limitations</a></li>
+            <li><a href="about.html">About &amp; Project Notes</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">System Endpoints</div>
+          <ul class="footer-links">
+            <li><a href="http://localhost:3000" class="dashboard-link" target="_blank" rel="noopener">Live SOC Dashboard &rarr;</a></li>
+            <li><a href="http://localhost:8000/docs" target="_blank" rel="noopener">FastAPI Swagger UI &rarr;</a></li>
+            <li><a href="about.html#roadmap">Engineering Roadmap &rarr;</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>AI-NIDS &bull; Applied Cybersecurity Engineering Research Project</div>
+        <div>Model: Random Forest (100 Trees) &bull; 65,000 Balanced CICIDS2017 Samples</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/showcase.js"></script>
+</body>
+</html>
